@@ -36,7 +36,7 @@ class Register extends React.Component {
 
     async onSignup() {
         const { email, password, name } = this.state;
-        await fetch('http://192.168.43.42:3006/useradd?Name='+name+'&Email='+email+'&Password='+password+'')
+        await fetch('http://192.168.0.108:3006/useradd?Name='+name+'&Email='+email+'&Password='+password+'')
         .then(users => {
             
             alert("inserted");
@@ -114,25 +114,7 @@ class Register extends React.Component {
                                                             onChangeText={(password) => this.setState({ password })}
                                                         />
                                                     </Block>
-                                                    {/* <Block
-                                                        style={{ marginVertical: theme.SIZES.BASE, marginLeft: 15 }}
-                                                        row
-                                                        width={width * 0.75}
-                                                    >
-                                                        <Checkbox
-                                                            checkboxStyle={{
-                                                                borderWidth: 1,
-                                                                borderRadius: 2,
-                                                                borderColor: '#E3E3E3'
-                                                            }}
-                                                            color={nowTheme.COLORS.PRIMARY}
-                                                            labelStyle={{
-                                                                color: nowTheme.COLORS.HEADER,
-                                                                fontFamily: 'montserrat-regular'
-                                                            }}
-                                                            label="I agree to the terms and conditions."
-                                                        />
-                                                    </Block> */}
+                                                  
                                                 </Block>
                                                 <Block center>
                                                     <Button color="primary" round style={styles.createButton} onPress={this.onSignup.bind(this)}>

@@ -24,7 +24,7 @@ export default class Onboarding extends React.Component {
    
       const { email, password } = this.state;
 
-      await fetch('http://192.168.43.42:3006/userlogin?Email='+email+'&Password='+password+'')
+      await fetch('http://192.168.0.108:3006/userlogin?Email='+email+'&Password='+password+'')
       .then(res => res.json())
         .then(users => {
 

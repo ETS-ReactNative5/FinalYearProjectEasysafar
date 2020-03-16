@@ -100,6 +100,12 @@ class createtrip extends Component {
             iconLeft
             textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
             title="  START TRIP "
+            onPress={() => {
+              // this.setState({ visible: true });
+              // AsyncStorage.setItem('guidetype', 'restaurant');
+              // alert(placeType);
+              this.props.navigation.navigate("TripMapPage");
+            }}
           />
         </Block>
 

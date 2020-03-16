@@ -16,6 +16,7 @@ import createtrip from '../screens/createtrip';
 import GuidePlaceType from '../screens/GuidePlaceType';
 import GuidePlaceResult from '../screens/GuidePlaceResult';
 import profile from '../screens/profile';
+import TripMapPage from '../screens/TripMapPage';
 
 
 // drawer 
@@ -111,18 +112,18 @@ const GuidesStack = createStackNavigator(
 
 const createtripStack = createStackNavigator(
   {
-    Home: {
-      screen: Home,
-      navigationOptions: ({ navigation }) => ({
-        header: <Header search options title="DashBoard" navigation={navigation} />
-      })
-    },
     createtrip: {
       screen: createtrip,
       navigationOptions: ({ navigation }) => ({
         header: <Header title="Create Trip" navigation={navigation} />
       })
-    }
+    },
+    TripMapPage: {
+      screen: TripMapPage,
+      navigationOptions: ({ navigation }) => ({
+        header: <Header title="Trip Map Page" navigation={navigation} />
+      })
+    },
   },
   {
     cardStyle: {
