@@ -22,6 +22,12 @@ class createtrip extends Component {
             longitude: null,
             error: null,
             coords: [],
+            departurePlaceID: "",
+            destinationPlaceID: "",
+            startingLat: null,
+            startingLong: null,
+            endingLat: null,
+            endingLong: null,
 
         };
     }
@@ -30,11 +36,30 @@ class createtrip extends Component {
         this.getDirections();
     }
 
-    async getDirections(startLoc, destinationLoc) {
+    async getDirections() {
         try {
-            const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=24.8607,67.0011&destination=31.5204,74.3587&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
+            let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
+            let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
+            this.setState({
+                departurePlaceID: departurePlaceID1,
+                destinationPlaceID: destinationPlaceID1
+            })
+            const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
             const respJson = await resp.json();
             if (respJson.routes.length > 0) {
+                const startingLong= respJson.routes[0].legs[0].start_location.lng;
+                const startingLat= respJson.routes[0].legs[0].start_location.lat;
+                
+                const endingLat= respJson.routes[0].legs[0].end_location.lat;
+                const endingLong= respJson.routes[0].legs[0].end_location.lng;
+                this.setState({
+                    startingLong:startingLong,
+                    startingLat:startingLat,
+                    endingLat:endingLat,
+                    endingLong:endingLong
+                })
+                
+               
                 const points = Polyline.decode(respJson.routes[0].overview_polyline.points);
                 const coords = points.map((point, index) => {
                     return {
@@ -43,7 +68,7 @@ class createtrip extends Component {
                     };
                 });
                 this.setState({ coords });
-                console.warn(coords)
+                // console.warn(coords)
             }
             return;
         } catch (error) {
@@ -54,22 +79,25 @@ class createtrip extends Component {
 
 
     render() {
-
+        const { startingLat, startingLong } = this.state;
+// alert(this.state.startingLong);
         return (
+            
             <MapView style={styles.map} initialRegion={{
-                latitude: 24.8607,
-                longitude: 67.0011,
+                latitude: startingLat,
+                longitude: startingLong,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421
             }}>
 
                 <MapView.Marker
-                    
+
                     coordinate={{
-                        latitude:24.8607,
-                        longitude: 67.0011
+                        latitude: 24.8607333,
+                        longitude: 67.0011246,
+
                     }}
-                    // title={marker.id}
+                // title={marker.id}
                 />
 
 

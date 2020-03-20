@@ -97,7 +97,7 @@ class MapScreen extends Component {
 
           markers.push(marketObj);
         });
-  
+
         this.setState({ places: markers });
       });
   }
@@ -134,13 +134,9 @@ class MapScreen extends Component {
           </MapView>
         </View>
 
-
         <View style={styles.placeList}>
           <PlaceList places={places} navigation={this.props.navigation} placeid={this.state.placeid} type={this.state.type} />
         </View>
-
-        
-
 
       </View>
     );

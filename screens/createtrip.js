@@ -11,8 +11,9 @@ import { StyleSheet, TouchableOpacity, Dimensions} from 'react-native'
 import DatePicker from 'react-native-datepicker';
 import { Input } from "../components";
 import { Button } from 'react-native-elements';
+import { AsyncStorage } from 'react-native';
 
-class createtrip extends React.Component {
+class createtrip extends React.Component { 
   constructor(props) {
     super(props);
     this.state = {
@@ -32,7 +33,8 @@ class createtrip extends React.Component {
       destinationPlaceID: "",
       errors: "",
       destination: "",
-      predictions: []
+      predictions: [],
+      showAMPM: false
     };
   }
 
@@ -60,70 +62,70 @@ class createtrip extends React.Component {
     return (
       <Block style={{ flex: 1 }}>
         <Block style={{ flex: 0.45, flexDirection: 'column',  paddingHorizontal: theme.SIZES.BASE }}>
-          <Block style={{ marginBottom: 5 }}>
+          <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 0.5 }}>
             <GooglePlacesAutocomplete
-            placeholder="Departure"
-            minLength={2} 
-            autoFocus={false}
-            returnKeyType={'search'} 
-            listViewDisplayed="auto" 
-            fetchDetails={true}
-            renderDescription={row => row.description} 
-            onPress={(data, details = null) => {
-              const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=`+details.place_id+`
-              &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
-              fetch(baseUrl)
-              .then(res => res.json())
-              .then(res => {
-                alert(details.place_id);
-                this.setState({ departurePlaceID: details.place_id });
-                alert(this.state.departurePlaceID);
-                console.warn(details.place_id);
-              });
-            }}
-            getDefaultValue={() => {
-              return ''; // text input default value
-            }}
-            query={{
-            
-              key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
-              language: 'en', 
-
-            }}
-            styles={{
-              description: {
-                fontWeight: 'bold',
-                backgroundColor: "white",
-                fontSize: 15,
-              },
-              predefinedPlacesDescription: {
-                color: '#1faadb',
-              },
-            }}
-            nearbyPlacesAPI="GooglePlacesSearch" 
-            GoogleReverseGeocodingQuery={{}}
-            GooglePlacesSearchQuery={{
-              rankby: 'distance',
-              radius: 1000
-            }}
-            filterReverseGeocodingByTypes={[
-              'locality',
-              'administrative_area_level_3',
-            ]} 
-            debounce={200}
-          />
+              placeholder="Departure"
+              minLength={2} 
+              autoFocus={false}
+              returnKeyType={'search'} 
+              listViewDisplayed="auto" 
+              fetchDetails={true}
+              renderDescription={row => row.description} 
+              onPress={(data, details = null) => {
+                const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=`+details.place_id+`
+                &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
+                fetch(baseUrl)
+                .then(res => res.json())
+                .then(res => {
+                  // alert(details.place_id);
+                  AsyncStorage.setItem('departurePlaceID', details.place_id);
+                  this.setState({ departurePlaceID: details.place_id });
+                  // alert(this.state.departurePlaceID);
+                  console.warn(details.place_id);
+                });
+              }}
+              getDefaultValue={() => {
+                return ''; // text input default value
+              }}
+              query={{
+                key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
+                language: 'en', 
+              }}
+              styles={{
+                description: {
+                  fontWeight: 'bold',
+                  backgroundColor: "white",
+                  fontSize: 15,
+                },
+                predefinedPlacesDescription: {
+                  color: '#1faadb',
+                },
+              }}
+              nearbyPlacesAPI="GooglePlacesSearch" 
+              GoogleReverseGeocodingQuery={{}}
+              GooglePlacesSearchQuery={{
+                rankby: 'distance',
+                radius: 1000
+              }}
+              filterReverseGeocodingByTypes={[
+                'locality',
+                'administrative_area_level_3',
+              ]} 
+              debounce={200}
+            />
           </Block>
-          <Block width={width * 0.8} style={{ marginBottom: 5 }}>
+          <Block width={width * 0.8} style={{ flexDirection: 'row', justifyContent: 'center', paddingTop: theme.SIZES.BASE * 0.5 }}>
             <DatePicker
               style={{width: 200}}
               date={this.state.date} //initial date from state
-              mode="date" //The enum of date, datetime and time
+              mode="datetime" //The enum of date, datetime and time
               placeholder="select date"
               format="DD-MM-YYYY"
               minDate="01-01-2016"
               maxDate="01-01-2019"
               confirmBtnText="Confirm"
               cancelBtnText="Cancel"
+              is24Hour={this.state.showAMPM}
               customStyles={{
                 dateIcon: {
                   position: 'absolute',
@@ -138,7 +140,7 @@ class createtrip extends React.Component {
               onDateChange={(date) => {this.setState({date: date})}}
             />
           </Block>
-          <Block style={{ marginBottom: 5 }}>
+          <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 0.5 }}>
             <GooglePlacesAutocomplete
               placeholder="Destination"
               minLength={2} 
@@ -153,9 +155,10 @@ class createtrip extends React.Component {
                 fetch(baseUrl)
                 .then(res => res.json())
                 .then(res => {
-                  alert(details.place_id);
+                  // alert(details.place_id);
+                  AsyncStorage.setItem('destinationPlaceID', details.place_id);
                   this.setState({ destinationPlaceID: details.place_id });
-                  alert(this.state.destinationPlaceID);
+                  // alert(this.state.destinationPlaceID);
                   console.warn(details.place_id);
                 });
               }}
@@ -191,17 +194,18 @@ class createtrip extends React.Component {
               debounce={200}
             />
           </Block>
-          <Block width={width * 0.8} style={{ marginBottom: 5 }}>
+          <Block width={width * 0.8} style={{ flexDirection: 'row', justifyContent: 'center', paddingTop: theme.SIZES.BASE * 0.5 }}>
             <DatePicker
               style={{width: 200}}
               date={this.state.date} //initial date from state
-              mode="date" //The enum of date, datetime and time
+              mode="datetime" //The enum of date, datetime and time
               placeholder="select date"
               format="DD-MM-YYYY"
               minDate="01-01-2016"
               maxDate="01-01-2019"
               confirmBtnText="Confirm"
               cancelBtnText="Cancel"
+              is24Hour={this.state.showAMPM}
               customStyles={{
                 dateIcon: {
                   position: 'absolute',
@@ -216,35 +220,45 @@ class createtrip extends React.Component {
               onDateChange={(date) => {this.setState({date: date})}}
             />
           </Block>
-          <Block style={{flexDirection: 'row', alignItems: 'space-between'}}>
-            <Block width={width * 0.4} style={{ marginBottom: 5 }}>
-              <Input
-                placeholder="  Lunch"
-                style={styles.inputs}
-                iconContent={
-                  <Icon
-                    size={11}
-                    color={nowTheme.COLORS.ICON}
-                    name="search"
-                    family="NowExtra"
-                  />
+          
+          <Block style={{flexDirection: 'row', justifyContent: 'center', paddingTop: theme.SIZES.BASE * 0.5}}>
+            <Text>Lunch Time: </Text>
+            <DatePicker
+              mode="time"
+              is24Hour={this.state.showAMPM}
+              style={{width: 200}}
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  left: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 36
                 }
-              />
-            </Block>
-            <Block width={width * 0.4} style={{ marginBottom: 5 }}>
-              <Input
-                placeholder="  Dinner"
-                style={styles.inputs}
-                iconContent={
-                  <Icon
-                    size={11}
-                    color={nowTheme.COLORS.ICON}
-                    name="search"
-                    family="NowExtra"
-                  />
+              }}
+            />
+          </Block>
+
+          <Block style={{flexDirection: 'row', justifyContent: 'center', paddingTop: theme.SIZES.BASE * 0.5}}>
+            <Text>Dinner Time: </Text>
+            <DatePicker
+              mode="time"
+              is24Hour={this.state.showAMPM}
+              style={{width: 200}}
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  left: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 36
                 }
-              />
-            </Block>
+              }}
+            />
           </Block>
         </Block>
 
@@ -264,6 +278,11 @@ class createtrip extends React.Component {
                 color="white"
               />
             }
+            onPress={() => {
+             
+              this.props.navigation.navigate("TripMapPage");
+              
+            }}
             type="solid"
             iconLeft
             textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
