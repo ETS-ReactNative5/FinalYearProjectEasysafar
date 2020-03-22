@@ -24,21 +24,21 @@ export default class Onboarding extends React.Component {
    
       const { email, password } = this.state;
 
-      await fetch('http://192.168.0.111:3006/userlogin?Email='+email+'&Password='+password+'')
-      .then(res => res.json())
-        .then(users => {
+      // await fetch('http://192.168.0.112:3006/userlogin?Email='+email+'&Password='+password+'')
+      // .then(res => res.json())
+      //   .then(users => {
 
-            if(users==1)
-            {
+      //       if(users==1)
+            // {
               alert("success");
               this.props.navigation.navigate('Home') ;
-            }
-            else
-            {
-              alert("invalid credentials");
-            }           
+        //     }
+        //     else
+        //     {
+        //       alert("invalid credentials");
+        //     }           
             
-        })
+        // })
        
   }
 

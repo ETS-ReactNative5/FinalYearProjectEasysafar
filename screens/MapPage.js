@@ -128,9 +128,9 @@ class MapScreen extends Component {
                   latitude: marker.marker.latitude,
                   longitude: marker.marker.longitude
                 }}
-                title={marker.id}
+                title={marker.name}
               />
-            ))}
+            ))}  
           </MapView>
         </View>
 
