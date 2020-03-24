@@ -1,15 +1,11 @@
-import { View } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import React, { Component } from "react";
-import {useState} from 'react';
 import { Block, Text, theme } from 'galio-framework';
-import {  nowTheme } from '../constants';
 const { width,} = Dimensions.get("screen");
 import { FontAwesome } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { StyleSheet, TouchableOpacity, Dimensions} from 'react-native'
 import DatePicker from 'react-native-datepicker';
-import { Input } from "../components";
 import { Button } from 'react-native-elements';
 import { AsyncStorage } from 'react-native';
 
@@ -77,10 +73,8 @@ class createtrip extends React.Component {
                 fetch(baseUrl)
                 .then(res => res.json())
                 .then(res => {
-                  // alert(details.place_id);
                   AsyncStorage.setItem('departurePlaceID', details.place_id);
                   this.setState({ departurePlaceID: details.place_id });
-                  // alert(this.state.departurePlaceID);
                   console.warn(details.place_id);
                 });
               }}
@@ -201,8 +195,8 @@ class createtrip extends React.Component {
               mode="datetime" //The enum of date, datetime and time
               placeholder="select date"
               format="DD-MM-YYYY"
-              minDate="01-01-2016"
-              maxDate="01-01-2019"
+              minDate="01-01-2020"
+              maxDate="01-01-2021"
               confirmBtnText="Confirm"
               cancelBtnText="Cancel"
               is24Hour={this.state.showAMPM}
@@ -218,6 +212,7 @@ class createtrip extends React.Component {
                 }
               }}
               onDateChange={(date) => {this.setState({date: date})}}
+              
             />
           </Block>
           
@@ -279,7 +274,9 @@ class createtrip extends React.Component {
               />
             }
             onPress={() => {
-             
+
+              AsyncStorage.setItem('TripStartTime', '1200');
+              AsyncStorage.setItem('TripEndTime', '2200');
               this.props.navigation.navigate("TripMapPage");
               
             }}
