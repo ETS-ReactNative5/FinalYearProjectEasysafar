@@ -275,7 +275,7 @@ class createtrip extends React.Component {
             }
             onPress={() => {
 
-              AsyncStorage.setItem('TripStartTime', '1200');
+              AsyncStorage.setItem('TripStartTime', '1700');
               AsyncStorage.setItem('TripEndTime', '2200');
               this.props.navigation.navigate("TripMapPage");
               

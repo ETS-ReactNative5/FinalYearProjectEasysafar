@@ -3,6 +3,8 @@ import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { StyleSheet, SegmentedControlIOSComponent, } from "react-native";
 import { AsyncStorage } from 'react-native';
 import Polyline from '@mapbox/polyline';
+import haversine from 'haversine-distance'
+var distance = require('euclidean-distance')
 
 class createtrip extends Component {
     constructor(props) {
@@ -40,29 +42,22 @@ class createtrip extends Component {
     }
 
     async function() {
-        let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
-        
-        let i = 3;
+        let departurePlaceID1 = "ChIJpe3UA-I4sz4R2HyQM4ea-pQ" // await AsyncStorage.getItem('departurePlaceID');
+        let i = 0;
         var place = departurePlaceID1;
-        // console.warn("didmount:" + place);
 
-        // while (i < 6) {
-            // console.warn(i);
-            // let place1 = this.getPlaces(place)
-            // i=i+1;
+        while (i < 6) {
             let place1 = await this.getPlaces(place);
-            await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1 + `&fields=name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+            await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1 + `&fields=name,place_id&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                 .then(res => res.json())
 
                 .then(res => {
-                    console.warn("location #  : " + res.result.name)
+                    console.warn("location #" + i + ": " + res.result.name + " " + res.result.place_id)
                 });
-            // place = place1;
-            // // console.warn(place);
-            // i = i + 1;
-        // }
-
-        // }  
+            place = place1;
+            i = i + 1;
+        }
+        // console.warn(place1);
     }
 
     TimeConversion(StartTime) {
@@ -74,132 +69,187 @@ class createtrip extends Component {
     }
 
     async getPlaces(departurePlaceID1) {
-        try {
-            console.warn("function: " + departurePlaceID1)
-            // let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
-            let destinationPlaceID1 =  AsyncStorage.getItem('destinationPlaceID');
-            let StartTime = await AsyncStorage.getItem('TripStartTime'); //hours string "1300"
-            let StartTripTime_seconds = this.TimeConversion(StartTime);
-            let EndTime = await AsyncStorage.getItem('TripEndTime');
-            let EndTripTime_seconds = this.TimeConversion(EndTime);
 
+        //Destination ID
+        let destinationPlaceID1 = "ChIJDZUT1dY9sz4RJniLuy58ltM" // await  AsyncStorage.getItem('destinationPlaceID');
 
+        //Start Time in seconds
+        let StartTime = await AsyncStorage.getItem('TripStartTime');
+        let StartTripTime_seconds = this.TimeConversion(StartTime);
 
-            // let final_place= "abc";
+        //End Time in seconds
+        let EndTime = await AsyncStorage.getItem('TripEndTime');
+        let EndTripTime_seconds = this.TimeConversion(EndTime);
 
-            const markers = [];
+        let i = 1;
 
-            fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + destinationPlaceID1 + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
-                .then(res => res.json())
+        //Max for rating
+        var max = -1000;
 
-                .then(res => {
+        const markers = [];
 
-                    let originaldistance = res.rows[0].elements[0].distance.value;
-                     fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
-                        .then(res => res.json())
+        let count = 1;
 
-                        .then(res => {
-                            let startingLatitude = res.result.geometry.location.lat;
-                            let startingLongitude = res.result.geometry.location.lng;
+        //API for place details of starting location
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+            .then(res => res.json())
 
-                             fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=5000&type=restaurant&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
-                                .then(res => res.json())
+            .then(async api1 => {
 
-                                .then(res => {
-                                    res.results.map((element) => {
-                                         fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + destinationPlaceID1 + `&destinations=place_id:` + element.place_id + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
-                                            .then(res => res.json())
+                //Longitute and Latitude of starting location 
+                let startingLatitude = api1.result.geometry.location.lat;
+                let startingLongitude = api1.result.geometry.location.lng;
 
-                                            .then(res => {
-                                                // if (element.place_id == destinationPlaceID1) {
-                                                //     return (element.place_id).toString();
-                                                //     // break;
-                                                // }
+                //API for place details of destination
+                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                    .then(res => res.json())
 
-                                                let distance = res.rows[0].elements[0].distance.value;
-                                                let duration = res.rows[0].elements[0].duration.value; //seconds 14100
+                    .then(async api2 => {
+                        //Longitute and Latitude of destnation 
+                        let endingLatitude = api2.result.geometry.location.lat;
+                        let endingLongitude = api2.result.geometry.location.lng;
 
-                                                if (distance > originaldistance) {
+                        //Haversine Distance from Starting Location to destination
+                        const a = { latitude: startingLatitude, longitude: startingLongitude }
+                        const b = { latitude: endingLatitude, longitude: endingLongitude }
 
-                                                }
-                                                else {
-                                                      fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + element.place_id + `&fields=opening_hours,price_level,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                        let distanceStartToEnd = haversine(a, b); // 10026 (in meters)
+
+                        //API for places nearby starting location
+                        await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=5000&type=restaurant&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                            .then(res => res.json())
+
+                            .then(async api3 => {
+
+                                //LOOP for all nearby from starting
+                                api3.results.map(async (element) => {
+
+                                    if (await element.place_id == await departurePlaceID1) {
+                                        console.warn("mana kara tha par phir bhe aya");
+                                    }
+                                    else {
+
+                                        //Haversine Distance from Spot to destination
+                                        const c = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
+                                        const d = { latitude: endingLatitude, longitude: endingLongitude }
+
+                                        let DistanceSpotToDestination = haversine(c, d);
+
+                                        //Haversine Distance from Starting Location to Spot
+                                        const e = { latitude: startingLatitude, longitude: startingLongitude }
+                                        const f = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
+
+                                        let DistanceStartToSpot = haversine(e, f);
+                                        // console.warn(haversine(c, f)); 
+                                        // console.warn("distance start to spot  "+DistanceStartToSpot);
+                                        
+
+                                        if (await DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot>0) {
+
+                                            await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + element.place_id + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                                .then(res => res.json())
+
+                                                .then(async api4 => {
+                                                    //Time taken to reach from starting to spot 
+                                                    let TravellingTime = api4.rows[0].elements[0].duration.value;
+
+                                                    //TOTAL WHEN WE WILL REACH FROM STARTING TO SPOT
+                                                    let TimeToReachSpot = StartTripTime_seconds + TravellingTime;
+
+                                                    await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + element.place_id + `&fields=opening_hours,price_level,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                                                         .then(res => res.json())
 
-                                                        .then(res => {
+                                                        .then(api5 => {
 
-                                                            let OpenTime_place = res.result.opening_hours.periods[0].open.time;
-                                                            let CloseTime_place = res.result.opening_hours.periods[0].close.time;
-                                                            let pricelevel = res.result.price_level;
-                                                            let rating = res.result.rating;
+                                                            //Opening time of place
+                                                            let OpenTime_place = this.TimeConversion(api5.result.opening_hours.periods[0].open.time);
 
-
-                                                            let max = -1000;
-
-                                                            let OpenTime_place_seconds = this.TimeConversion(OpenTime_place);
-
-                                                            let CloseTime_place_seconds = this.TimeConversion(CloseTime_place);
-                                                            if (CloseTime_place_seconds < 43200) {
-                                                                CloseTime_place_seconds = CloseTime_place_seconds + 86400;
+                                                            //Closing Time of place
+                                                            let CloseTime_place = this.TimeConversion(api5.result.opening_hours.periods[0].close.time);
+                                                            if (CloseTime_place < 43200) {
+                                                                CloseTime_place = CloseTime_place + 86400;
                                                             }
 
-                                                            let Time_StartToSpot = StartTripTime_seconds + duration;
+                                                            //Price level of place
+                                                            let pricelevel = api5.result.price_level;
 
-                                                            if (Time_StartToSpot < CloseTime_place_seconds - 1800 && Time_StartToSpot >= OpenTime_place_seconds) {
-                                                                if (pricelevel == undefined || pricelevel == 2) {
-                                                                    // console.warn(element.name);
-                                                                    // console.warn(element.place_id);
-                                                                    if (rating > max) {
-                                                                        max = rating;
-                                                                    }
+                                                            //Rating of place
+                                                            let rating = api5.result.rating;
+
+
+                                                            if (TimeToReachSpot >= OpenTime_place && TimeToReachSpot < CloseTime_place - 1800) {
+                                                                if (pricelevel == undefined || pricelevel == 3) {
+
+                                                                    api3.results.map((element1) => {
+                                                                        if (element1.place_id == element.place_id) {
+                                                                            if (element1.rating > max) {
+                                                                                max = element1.rating;
+                                                                            }
+                                                                        }
+                                                                    });
 
                                                                     if (rating == max) {
-                                                                        // this.setState({final_place: element.name})
-                                                                        // final_place = element.name;
-                                                                        const marketObj = {};
-                                                                        marketObj.id = element.id;
-                                                                        marketObj.place_id = element.place_id;
-                                                                        // this.setState({ placeid: marketObj.id });
-                                                                        marketObj.name = element.name;
-                                                                        // marketObj.photos = element.photos;
-                                                                        // marketObj.rating = element.rating;
-                                                                        marketObj.vicinity = element.vicinity;
-                                                                        marketObj.marker = {
-                                                                            latitude: element.geometry.location.lat,
-                                                                            longitude: element.geometry.location.lng
-                                                                        };
 
-                                                                        markers.push(marketObj);
-                                                                        let name = (element.place_id).toString();
-                                                                        AsyncStorage.setItem('FinalPlace', name);
-                                                                        // return name;
+                                                                        while (i == 1) {
+                                                                            // console.warn(element.name)
+                                                                            const marketObj = {};
+                                                                            marketObj.id = element.id;
+                                                                            marketObj.place_id = element.place_id;
+                                                                            this.setState({ placeid: marketObj.id });
+                                                                            marketObj.name = element.name;
+                                                                            marketObj.photos = element.photos;
+                                                                            marketObj.rating = element.rating;
+                                                                            marketObj.vicinity = element.vicinity;
+                                                                            marketObj.marker = {
+                                                                                latitude: element.geometry.location.lat,
+                                                                                longitude: element.geometry.location.lng
+                                                                            };
+                                                                            
+                                                                            if(marketObj!=null)
+                                                                            {
+                                                                                // console.warn(marketObj)
+                                                                                // console.warn("hi i am not emoty")
+                                                                                console.warn(element.name+" "+DistanceStartToSpot);
+                                                                                this.state.places_nearby.push(marketObj);
+                                                                                // console.warn(element.name+":"+this.state.places_nearby)
+                                                                                // this.state.places_nearby.push(marketObj);
+                                                                                // Object.assign(this.state.places_nearby,markers)
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                            //     console.warn("hi i am not emoty")
+                                                                            }
+                                                                            
+                                                                                
+
+                                                                            i = i + 1;
+                                                                            // console.warn(element.place_id)
+                                                                            // return (element.place_id).toString();
+                                                                            // this.setState({ places_nearby: markers });
+                                                                            // console.warn("no hello" + DistanceStartToSpot)
+                                                                            let FinalPlaceID = (element.place_id).toString();
+                                                                            AsyncStorage.setItem('FinalPlace', FinalPlaceID);
+                                                                        }
                                                                     }
-
                                                                 }
-                                                                else {
-
-                                                                }
-
                                                             }
-                                                            else {
-                                                            }
+
                                                         });
-                                                }
-                                            });
-                                    });
-                                    this.setState({ places_nearby: markers });
-                                });
-                        });
 
-                });
-            // console.warn(final_place);
-            // console.warn(
-            let final_place = await AsyncStorage.getItem('FinalPlace');
-            return final_place;
-        } catch (error) {
-            alert(error);
-        }
+                                                });
+                                        }
+                                    }
+                                });
+                            });
+
+                    });
+            });
+
+        let FinalPlaceID = await AsyncStorage.getItem('FinalPlace');
+        return FinalPlaceID;
     }
+
+
 
     async getDirections() {
         try {
@@ -256,6 +306,7 @@ class createtrip extends Component {
 
     render() {
         const { startingLat, startingLong, places_nearby } = this.state;
+        // console.warn(places_nearby)
 
         // alert(this.state.startingLong);
         return (

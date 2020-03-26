@@ -135,13 +135,13 @@ const createtripStack = createStackNavigator(
 
 
 
-const AccountStack = createStackNavigator(
+const ProfileStack = createStackNavigator(
   {
-    Register: {
-      screen: Register,
+    profile: {
+      screen: profile,
       navigationOptions: ({ navigation }) => ({
         header: (
-          <Header transparent title="Register" iconColor={'#333'} navigation={navigation} />
+          <Header transparent title="My Profile" iconColor={'#333'} navigation={navigation} />
         ),
         headerTransparent: true
       })
@@ -227,7 +227,7 @@ const AppStack = createDrawerNavigator(
       })
     },
     profile: {
-      screen: profile,
+      screen: ProfileStack,
       navigationOptions: navOpt => ({
         drawerLabel: ({ focused }) => <DrawerItem focused={focused} title="My Profile" />
       })
