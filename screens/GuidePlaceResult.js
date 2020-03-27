@@ -39,7 +39,7 @@ class GuidePlaceResult extends Component {
         try {
             let name = await AsyncStorage.getItem('name');
             let guidetype = await AsyncStorage.getItem('guidetype');
-            alert(name);
+            // alert(name);
             if (name == "Lahore, Punjab") {
                 this.setState({
                     placename: name,

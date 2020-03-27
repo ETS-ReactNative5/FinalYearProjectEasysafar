@@ -17,6 +17,7 @@ import GuidePlaceType from '../screens/GuidePlaceType';
 import GuidePlaceResult from '../screens/GuidePlaceResult';
 import profile from '../screens/profile';
 import TripMapPage from '../screens/TripMapPage';
+import SeachBar from '../screens/SearchBar'
 
 
 // drawer 
@@ -232,37 +233,7 @@ const AppStack = createDrawerNavigator(
         drawerLabel: ({ focused }) => <DrawerItem focused={focused} title="My Profile" />
       })
     },
-    Details: {
-      screen: Details,
-      navigationOptions: {
-        drawerLabel: () => { }
-      }
-    },
-    GuidePlaceType: {
-      screen: GuidePlaceType,
-      navigationOptions: {
-        drawerLabel: () => { }
-      }
-    },
-    
-    GuidePlaceResult: {
-      screen: GuidePlaceResult,
-      navigationOptions: {
-        drawerLabel: () => { }
-      }
-    },
-    MapPage: {
-      screen: MapPage,
-      navigationOptions: {
-        drawerLabel: () => { }
-      }
-    },
-    PlaceList: {
-      screen: PlaceList,
-      navigationOptions: {
-        drawerLabel: () => { }
-      }
-    },
+   
    
   },
   Menu

@@ -3,6 +3,9 @@ import { ImageBackground, Image, StyleSheet, StatusBar, Dimensions, Platform } f
 import { Block, Text, theme } from 'galio-framework';
 import { Button } from 'react-native-elements';
 const { height, width } = Dimensions.get('screen');
+import Spinner from 'react-native-loading-spinner-overlay';
+// import { toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 
 import {
   View,
@@ -16,30 +19,38 @@ export default class Onboarding extends React.Component {
   state = {
     email: '',
     password: '',
+    spinner: false,
   };
 
 
 
   async onLogin() {
-   
-      const { email, password } = this.state;
+    this.setState({
+      spinner: true
+    });
 
-      // await fetch('http://192.168.0.112:3006/userlogin?Email='+email+'&Password='+password+'')
-      // .then(res => res.json())
-      //   .then(users => {
+    const { email, password } = this.state;
 
-      //       if(users==1)
-            // {
-              alert("success");
-              this.props.navigation.navigate('Home') ;
-        //     }
-        //     else
-        //     {
-        //       alert("invalid credentials");
-        //     }           
-            
-        // })
-       
+    // await fetch('http://192.168.0.112:3006/userlogin?Email='+email+'&Password='+password+'')
+    // .then(res => res.json())
+    //   .then(users => {
+
+    //       if(users==1)
+    // {
+    // toast("Wow so easy !");
+    // alert("success");
+    this.setState({
+      spinner: false
+  });
+    this.props.navigation.navigate('Home');
+    //     }
+    //     else
+    //     {
+    //       alert("invalid credentials");
+    //     }           
+
+    // })
+
   }
 
   handleSubmitSignup = () => {
@@ -49,17 +60,17 @@ export default class Onboarding extends React.Component {
   render() {
 
     return (
-      <Block style={{flex: 1}}>
+      <Block style={{ flex: 1 }}>
         <ImageBackground
           source={require('../assets/hello.jpg')}
           style={styles.background}
-          //resizeMode="cover"
+        //resizeMode="cover"
         >
           <Block style={styles.logoContainer}>
             <Image
               source={require('../assets/icon.png')}
               resizeMode="contain"
-            /> 
+            />
           </Block>
 
           <Block style={styles.inputContainer}>
@@ -69,7 +80,7 @@ export default class Onboarding extends React.Component {
                 placeholder="Email"
                 keyboardType="email-address"
                 underlineColorAndroid='transparent'
-                onChangeText={(email) => this.setState({ email })} 
+                onChangeText={(email) => this.setState({ email })}
               />
             </Block>
 
@@ -79,7 +90,7 @@ export default class Onboarding extends React.Component {
                 placeholder="Password"
                 secureTextEntry={true}
                 underlineColorAndroid='transparent'
-                onChangeText={(password) => this.setState({ password })} 
+                onChangeText={(password) => this.setState({ password })}
               />
             </Block>
           </Block>
@@ -100,7 +111,7 @@ export default class Onboarding extends React.Component {
             />
           </Block>
 
-          
+
         </ImageBackground>
       </Block>
     );
@@ -136,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 0.25,
     flexDirection: 'column',
     justifyContent: 'space-around',
-    alignItems:'center',
+    alignItems: 'center',
     paddingTop: theme.SIZES.BASE * 2
 
   },
@@ -174,13 +185,13 @@ const styles = StyleSheet.create({
   input: {
     borderBottomColor: '#F5FCFF',
     backgroundColor: '#FFFFFF',
-    borderRadius: 30,  
+    borderRadius: 30,
     borderBottomWidth: 1,
     width: 250,
     height: 45,
     flexDirection: 'row',
     alignItems: 'center',
-    
+
   },
 
   inputs: {
@@ -211,7 +222,7 @@ const styles = StyleSheet.create({
   loginButton: {
     backgroundColor: "#00b5ec",
   },
-  
+
   loginText: {
     color: 'white',
   }

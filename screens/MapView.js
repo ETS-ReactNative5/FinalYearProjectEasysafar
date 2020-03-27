@@ -35,12 +35,12 @@ class Map extends React.Component {
       this._getLocationAsync();
     }
   }
-    
+
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
       this.setState({
-      errorMessage: 'Permission to access location was denied',
+        errorMessage: 'Permission to access location was denied',
       });
     }
     let location = await Location.getCurrentPositionAsync({});
@@ -76,19 +76,21 @@ class Map extends React.Component {
       currentlongitude = JSON.stringify(this.state.location.coords.longitude);
       currentlatitudeint = parseFloat(currentlatitude);
       currentlongitudeint = parseFloat(currentlongitude);
- 
+
 
       fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + currentlatitudeint + ',' + currentlongitudeint + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc')
         .then((response) => response.json())
         .then((responseJson) => {
-        currentaddress = responseJson.results[0].formatted_address;
-        console.log(currentaddress);
-      })
+          currentaddress = responseJson.results[0].formatted_address;
+          console.log(currentaddress);
+        })
     }
 
     return (
       <Block style={styles.group}>
-        <MapView style={styles.map} 
+
+
+        <MapView style={styles.map}
           region={{
             latitude: currentlatitudeint,
             longitude: currentlongitudeint,
@@ -97,7 +99,9 @@ class Map extends React.Component {
           }}
           showsUserLocation={true}
         />
-        <SearchBar />
+
+        {/* <SearchBar /> */}
+
       </Block>
     );
   }
@@ -113,16 +117,16 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject
   },
   buttonContainer: {
-    paddingHorizontal: theme.SIZES.BASE * 4, 
-    marginBottom: theme.SIZES.BASE , 
-     justifyContent: "center",
-    width: width   ,
+    paddingHorizontal: theme.SIZES.BASE * 4,
+    marginBottom: theme.SIZES.BASE,
+    justifyContent: "center",
+    width: width,
     height: theme.SIZES.BASE * 4,
     shadowRadius: 0,
     shadowOpacity: 0
   },
   button: {
-    backgroundColor: theme.COLORS.SUCCESS,  
+    backgroundColor: theme.COLORS.SUCCESS,
   },
 
 })

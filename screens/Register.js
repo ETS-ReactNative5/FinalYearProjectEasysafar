@@ -28,15 +28,16 @@ class Register extends React.Component {
         this.state = {
            email:"",
            password:"",
-           name:""
+           name:"",
+           phone:"",
             
         };
     }
 
 
     async onSignup() {
-        const { email, password, name } = this.state;
-        await fetch('http://192.168.0.108:3006/useradd?Name='+name+'&Email='+email+'&Password='+password+'')
+        const { email, password, name, phone } = this.state;
+        await fetch('http://192.168.43.42:3006/useradd?Name='+name+'&Email='+email+'&Password='+password+'&phone='+phone+'')
         .then(users => {
             
             alert("inserted");
@@ -58,12 +59,12 @@ class Register extends React.Component {
                                 <Block flex space="evenly">
 
                                     <Block flex={1} middle space="between">
-                                        <Block center flex={0.9}>
+                                        <Block center flex={1}>
                                             <Block flex space="between">
                                                 <Block style={{ marginTop: 20 }}>
                                                     <Block width={width * 0.8} style={{ marginBottom: 5 }}>
                                                         <Input
-                                                            placeholder="Name"
+                                                            placeholder="Username"
                                                             style={styles.inputs}
                                                             iconContent={
                                                                 <Icon
@@ -77,7 +78,22 @@ class Register extends React.Component {
                                                             onChangeText={(name) => this.setState({ name })}
                                                         />
                                                     </Block>
-                                                  
+                                                    <Block width={width * 0.8} style={{ marginBottom: 5 }}>
+                                                        <Input
+                                                            placeholder="Phone #"
+                                                            style={styles.inputs}
+                                                            iconContent={
+                                                                <Icon
+                                                                    size={16}
+                                                                    color="#ADB5BD"    
+                                                                    name="mobile2x"
+                                                                    family="NowExtra"
+                                                                    style={styles.inputIcons}
+                                                                />
+                                                            }
+                                                            onChangeText={(phone) => this.setState({ phone })}
+                                                        />
+                                                    </Block>
                                                     <Block width={width * 0.8}>
                                                         <Input
                                                             placeholder="Email"
@@ -153,9 +169,9 @@ const styles = StyleSheet.create({
         height: height
     },
     registerContainer: {
-        marginTop: 55,
+        marginTop: 50,
         width: width * 0.9,
-        height: height < 812 ? height * 0.5 : height * 0.5,
+        height: height < 812 ? height * 0.6 : height * 0.6,
         backgroundColor: nowTheme.COLORS.WHITE,
         borderRadius: 4,
         shadowColor: nowTheme.COLORS.BLACK,

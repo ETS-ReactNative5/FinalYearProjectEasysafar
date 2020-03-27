@@ -15,10 +15,10 @@ class GuidePlaceType extends React.Component {
     super(props);
     this.state = {
       placename: "",
-      lat:"",
-      long:"",
-      temp:"",
-      image:require('../assets/mingora.jpg')
+      lat: "",
+      long: "",
+      temp: "",
+      image: require('../assets/mingora.jpg')
     };
   }
 
@@ -27,78 +27,78 @@ class GuidePlaceType extends React.Component {
   }
 
   getData = async () => {
-    
+
     try {
       let name = await AsyncStorage.getItem('name');
       if (name == "Lahore, Punjab") {
         this.setState({
-            placename: name,
-            lat: 31.5204,
-            long: 74.3587,
-            image: require('../assets/badshahi.jpg')
+          placename: name,
+          lat: 31.5204,
+          long: 74.3587,
+          image: require('../assets/badshahi.jpg')
         });
-        
-    }
-    else if (name == "Hunza, Swat") {
-        this.setState({
-            placename: name,
-            lat: 36.3167,
-            long: 74.6500,
-            image: require('../assets/hunza.jpg')
-        });
-        
-    }
-    else if (name == "Abbottabad, KPK") {
-        this.setState({
-            placename: name,
-            lat: 34.1688,
-            long: 73.2215,
-            image: require('../assets/abottabad.jpg')
-        });
-        
-    }
-    else if (name == "Kalam, Swat") {
-        this.setState({
-            placename: name,
-            lat: 35.4902,
-            long: 72.5796,
-            image: require('../assets/kalam.jpg')
-        });
-        
-    }
-    else if (name == "Arang Kel, Kashmir") {
-        this.setState({
-            placename: name,
-            lat: 34.8051,
-            long: 74.3456,
-            image: require('../assets/arangkel.jpg')
-        });
-       
-    }
-    else if (name == "Mingora, Swat") {
-        this.setState({
-            placename: name,
-            lat: 34.7717,
-            long: 72.3602,
-            image: require('../assets/mingora.jpg')
-        });
-        
-    }
 
-    const{lat,long,temp} = this.state;
-    // alert(lat );
-    // alert(long);
-    this.setState({ placename: name });
-      fetch('https://api.openweathermap.org/data/2.5/forecast?lat='+lat+'&lon='+long+'&units=metric&appid=ffc2402c9e6eb729217a5ed3227741ec')
+      }
+      else if (name == "Hunza, Swat") {
+        this.setState({
+          placename: name,
+          lat: 36.3167,
+          long: 74.6500,
+          image: require('../assets/hunza.jpg')
+        });
+
+      }
+      else if (name == "Abbottabad, KPK") {
+        this.setState({
+          placename: name,
+          lat: 34.1688,
+          long: 73.2215,
+          image: require('../assets/abottabad.jpg')
+        });
+
+      }
+      else if (name == "Kalam, Swat") {
+        this.setState({
+          placename: name,
+          lat: 35.4902,
+          long: 72.5796,
+          image: require('../assets/kalam.jpg')
+        });
+
+      }
+      else if (name == "Arang Kel, Kashmir") {
+        this.setState({
+          placename: name,
+          lat: 34.8051,
+          long: 74.3456,
+          image: require('../assets/arangkel.jpg')
+        });
+
+      }
+      else if (name == "Mingora, Swat") {
+        this.setState({
+          placename: name,
+          lat: 34.7717,
+          long: 72.3602,
+          image: require('../assets/mingora.jpg')
+        });
+
+      }
+
+      const { lat, long, temp } = this.state;
+      // alert(lat );
+      // alert(long);
+      this.setState({ placename: name });
+      fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + long + '&units=metric&appid=ffc2402c9e6eb729217a5ed3227741ec')
         .then((response) => response.json())
         .then((responseJson) => {
           // console.warn(responseJson.list[0].main.temp);
-          this.setState({temp : responseJson.list[0].main.temp});
-          
+          this.setState({ temp: responseJson.list[0].main.temp });
+
           // currentaddress = responseJson.results[0].formatted_address;
           // console.log(currentaddress);
         })
-      
+
 
     }
     catch (error) {
@@ -108,7 +108,7 @@ class GuidePlaceType extends React.Component {
 
 
   render() {
-    const{image, temp} = this.state;
+    const { image, temp } = this.state;
     return (
       <Block style={{ flex: 1, }}>
         <Block style={styles.group}>
@@ -116,15 +116,15 @@ class GuidePlaceType extends React.Component {
             source={image}
             style={{ width: width, height: theme.SIZES.BASE * 15 }}
           />
-          <Block style={{flex: 0.3, flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end', color: 'white'}}>
-            
-            
+          <Block style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end', color: 'white' }}>
+
+
           </Block>
         </Block>
         {/* <Text style={{fontWeight: 'bold', fontSize: 40, color: 'white', fontFamily: 'montserrat-regular'}}>{temp} C</Text> */}
-        <Text style={{fontSize:25, marginLeft:10, lineHeight:22, fontWeight: 'bold', color: 'white'}}>
+        <Text style={{ fontSize: 25, marginLeft: 10, lineHeight: 22, fontWeight: 'bold', color: 'white' }}>
           {temp}
-          <Text style={{fontSize: 10, lineHeight:25 * 1.1, fontWeight: 'bold', textAlignVertical: 'bottom', color: 'white'}}>
+          <Text style={{ fontSize: 10, lineHeight: 25 * 1.1, fontWeight: 'bold', textAlignVertical: 'bottom', color: 'white' }}>
             o
           </Text>
           C
@@ -141,13 +141,13 @@ class GuidePlaceType extends React.Component {
               <TouchableOpacity
                 style={styles.button1}
                 onPress={() => {
-                  this.setState({ visible: true }); 
+                  this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'park');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
                 <Ionicons name="md-star" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Park</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -155,11 +155,12 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'tourist_attraction');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
                 <Ionicons name="ios-bed" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Tourist </Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Attraction</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -167,11 +168,11 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'restaurant');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
                 <Ionicons name="md-restaurant" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Eateries</Text>
               </TouchableOpacity>
             </Block>
 
@@ -181,11 +182,11 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'bank');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
                 <FontAwesome name="bank" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Banks</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -193,11 +194,11 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'movie_theater');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
-            <Ionicons name="md-film" size={32} color="white" />
+                <Ionicons name="md-film" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Cinemas</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -205,11 +206,12 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'shopping_mall');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
                 <FontAwesome name="shopping-cart" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Shopping</Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Malls</Text>
               </TouchableOpacity>
             </Block>
 
@@ -219,11 +221,12 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'clothing_store');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
-              <FontAwesome name="shopping-bag" size={32} color="white" />
+                <FontAwesome name="shopping-bag" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Clothing</Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Store</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -231,11 +234,11 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'museum');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
-              <FontAwesome name="building" size={32} color="white" />
+                <FontAwesome name="building" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Museums</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -243,11 +246,12 @@ class GuidePlaceType extends React.Component {
                 onPress={() => {
                   this.setState({ visible: true });
                   AsyncStorage.setItem('guidetype', 'gas_station');
-                  // alert(placeType);
                   this.props.navigation.navigate("GuidePlaceResult");
                 }}
               >
                 <MaterialIcons name="local-gas-station" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Gas</Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Station</Text>
               </TouchableOpacity>
             </Block>
           </ScrollView>
@@ -276,7 +280,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button2: {
@@ -289,7 +293,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button3: {
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button4: {
@@ -315,7 +319,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    // width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button5: {
@@ -328,7 +333,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button6: {
@@ -341,7 +346,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button7: {
@@ -354,7 +359,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button8: {
@@ -367,7 +372,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
   button9: {
@@ -380,7 +385,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    width: width - theme.SIZES.BASE * 15,
+    width: width / 3,
     height: theme.SIZES.BASE * 8,
   },
 

@@ -1,15 +1,10 @@
 import React, { Component } from "react";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { GOOGLE_API_KEY } from "react-native-dotenv";
 import { Block, Button, Text, theme } from 'galio-framework';
-import { Images, nowTheme, articles, tabs } from '../constants';
 const { width, height } = Dimensions.get("screen");
-import { FontAwesome } from '@expo/vector-icons';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { Animated, View, StyleSheet, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
-import FloatLabelTextInput from 'react-native-floating-label-text-input';
 import { AsyncStorage } from 'react-native';
-import { Card } from 'react-native-elements';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 //Components
 
@@ -39,23 +34,46 @@ class Components extends Component {
       long: null,
       places: [],
       isLoading: false,
-      name: "",
-      rating: "",
-      type: "",
-      address: "",
-      phone: "",
+      name: "-",
+      rating: "-",
+      type: [],
+      address: "-",
+      phone: "-",
       placeid: "a",
-      image1url: "",
-      image2url: "",
-      image3url: "",
-      image4url: "",
-      image5url: "",
-      icon: "",
-      website: ""
+      image1url: "-",
+      image2url: "-",
+      image3url: "-",
+      image4url: "-",
+      image5url: "-",
+      website: "-",
+      spinner: true,
+      price_level: "-",
+      opening_hours: "-",
+      review: "-",
+      open_now: false,
+      review1author: "",
+      review2author: "",
+      review3author: "",
+      review4author: "",
+
+      review1text: "",
+      review2text: "",
+      review3text: "",
+      review4text: "",
+
+      review1time: "",
+      review2time: "",
+      review3time: "",
+      review4time: "",
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState({
+        spinner: false
+      });
+    }, 7000);
 
     this.displayData()
   }
@@ -66,7 +84,6 @@ class Components extends Component {
 
       this.setState({ placeid: placeid });
       this.getPlaces(placeid);
-      // alert(placeid); 
 
     }
     catch (error) {
@@ -74,33 +91,18 @@ class Components extends Component {
     }
   }
 
-  getCurrentLocation() {
-    navigator.geolocation.getCurrentPosition(position => {
-      const lat = position.coords.latitude;
-      const long = position.coords.longitude;
-      this.setState({ lat: lat, long: long });
-      this.getPlaces();
-    });
-  }
-
   getPlacesUrl(place_id, apiKey) {
-    // console.log(type);
-    // alert(place_id);
-    console.log(place_id);
-    const baseUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=name,rating,formatted_phone_number,address_component,adr_address,formatted_address,geometry,icon,name,permanently_closed,photo,place_id,plus_code,website,type,url,utc_offset,vicinity&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
+    // console.log(place_id);
+    const baseUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=name,rating,formatted_phone_number,formatted_address,geometry,name,photo,place_id,website,type,opening_hours,price_level,review&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
 
     return `${baseUrl}`;
   }
 
-  getPlaces(place) {
+  async getPlaces(place) {
 
-    // alert(place)
-    // alert(placeidd);
-    const { lat, long, placeType, placeid } = this.state;
-    const markers = [];
     // alert(placeid);
     const url = this.getPlacesUrl(place, GOOGLE_API_KEY);
-    fetch(url)
+    fetch(await url)
       .then(res => res.json())
 
       .then(res => {
@@ -111,21 +113,111 @@ class Components extends Component {
         this.setState({ image5url: res.result.photos[4].photo_reference });
         this.setState({ name: res.result.name });
         this.setState({ rating: res.result.rating });
-        this.setState({ type: res.result.types + ' ' });
+        this.setState({ type: res.result.types });
         this.setState({ address: res.result.formatted_address });
-        this.setState({ phone: res.result.formatted_phone_number });
-        this.setState({ icon: res.result.icon });
-        this.setState({ website: res.result.website});
+
+        if(res.result.formatted_phone_number == undefined)
+        {
+          this.setState({ phone: '-' });
+        }
+        else
+        {
+          this.setState({ phone: res.result.formatted_phone_number });
+        }
+        
+        
+        if(res.result.price_level == 0)
+        {
+          this.setState({ price_level: 'Free' });
+        }
+        else if(res.result.price_level == 1)
+        {
+          this.setState({ price_level: 'Inexpensive' });
+        }
+        else if(res.result.price_level == 2)
+        {
+          this.setState({ price_level: 'Moderate' });
+        }
+        else if(res.result.price_level == 3)
+        {
+          this.setState({ price_level: 'Expensive' });
+        }
+        else if(res.result.price_level == 4)
+        {
+          this.setState({ price_level: 'Very Expensive' });
+        }
+        else
+        {
+          this.setState({ price_level: '-' });
+        }
+
+        if(res.result.website == undefined)
+        {
+          this.setState({ website: '-' });
+        }
+        else
+        {
+          this.setState({ website: res.result.website });
+        }
+        
+        if(res.result.opening_hours.weekday_text == undefined)
+        {
+          this.setState({ opening_hours: '-' });
+        }
+        else
+        {
+          this.setState({ opening_hours: res.result.opening_hours.weekday_text });
+        }
+        
+        
+
+        if(res.result.opening_hours.open_now == undefined)
+        {
+          this.setState({ open_now: '-' });
+        }
+        else if(res.result.opening_hours.open_now == false)
+        {
+          this.setState({ open_now: 'Closed' });
+        }
+        else
+        {
+          this.setState({ open_now: 'Open' });
+        }
+
+        this.setState({ review1author: res.result.reviews[0].author_name });
+        this.setState({ review1text: res.result.reviews[0].text });
+        this.setState({ review1time: res.result.reviews[0].relative_time_description });
+
+        this.setState({ review2author: res.result.reviews[1].author_name });
+        this.setState({ review2text: res.result.reviews[1].text });
+        this.setState({ review2time: res.result.reviews[1].relative_time_description });
+
+        this.setState({ review3author: res.result.reviews[2].author_name });
+        this.setState({ review3text: res.result.reviews[2].text });
+        this.setState({ review3time: res.result.reviews[2].relative_time_description });
+
+        this.setState({ review4author: res.result.reviews[3].author_name });
+        this.setState({ review4text: res.result.reviews[3].text });
+        this.setState({ review4time: res.result.reviews[3].relative_time_description });
+
+
+      })
+      .catch(res => {
+
       });
+
+
   }
 
   render() {
-    const { name, rating, type, address, phone, placeid, image1url, image2url, image3url, image4url, image5url, icon, website } = this.state;
-
+    const { name, rating, type, address, placeid, phone, image1url, image2url, image3url, image4url, image5url, website, price_level,
+      opening_hours, open_now, review1author, review1text, review1time, review2author, review2text, review2time, review3author, review3text,
+      review3time, review4author, review4text, review4time } = this.state;
     let imageArray = []
     let barArray = []
+    // console.warn(reviews);
     images.forEach((image, i) => {
-      console.log(image, i)
+      // console.log(image, i)
       const thisImage = (
         <Image
           key={`image${i}`}
@@ -186,6 +278,7 @@ class Components extends Component {
               )
             }
           >
+
             <Image
               source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image1url + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
               style={{ width: width }}
@@ -218,7 +311,18 @@ class Components extends Component {
           </Block>
         </Block>
 
-        <Block style={{ flex: 0.6, marginTop: theme.SIZES.BASE }}>
+        <Block style={{ flex: 0.65, marginTop: theme.SIZES.BASE }}>
+
+          <View>
+            <Spinner
+              visible={this.state.spinner}
+              textContent={'Gathering Details'}
+              textStyle={styles.spinnerTextStyle}
+            />
+
+          </View>
+
+
           <ScrollView
             vertical
             showsVerticalScrollIndicator={false}
@@ -226,143 +330,91 @@ class Components extends Component {
 
           >
             <Block>
-              <View style={styles.container}>
-                <Card>
-                  {/*react-native-elements Card*/}
-                  <Text
-                    h5
-                    style={{
-                      fontFamily: 'montserrat-regular',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      fontWeight: 'bold'
-                    }}
-                    color={nowTheme.COLORS.HEADER}
-                  >
-                    {name}
-                  </Text>
-                  <Image
-                    
-                    source={{ uri: icon }}
-                  />
-                  <Text
-                    p
-                    style={{
-                      fontFamily: 'montserrat-regular',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      fontWeight: 'bold'
-                    }}
-                    color={nowTheme.COLORS.HEADER}
-                  >
-                    Rating:  {rating}
-                  </Text>
-                  <Text
-                    p
-                    style={{
-                      fontFamily: 'montserrat-regular',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      fontWeight: 'bold'
-                    }}
-                    color={nowTheme.COLORS.HEADER}
-                  >
-                    Address:  {address} 
-                    
-                  </Text>
-                  <Text
-                    p
-                    style={{
-                      fontFamily: 'montserrat-regular',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      marginTop: '2.5%',
-                      fontWeight: 'bold'
-                    }}
-                    color={nowTheme.COLORS.HEADER}
-                  >
-                    Type:  {type}
-                  </Text>
-                  <Text
-                    p
-                    style={{
-                      fontFamily: 'montserrat-regular',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      marginTop: '2.5%',
-                      fontWeight: 'bold'
-                    }}
-                    color={nowTheme.COLORS.HEADER}
-                  >
-                    Phone:  {phone}
-                  </Text>
-                  {/* <Image style={styles.inputIcon} source={require('../assets/phonee.png')} /> */}
-                  <Text
-                    p
-                    style={{
-                      fontFamily: 'montserrat-regular',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      marginTop: '2.5%',
-                      fontWeight: 'bold'
-                    }}
-                    color={nowTheme.COLORS.HEADER}
-                  >
-                    Website:  {website}
-                  </Text>
-                </Card>
-              </View>
+
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+                <View style={styles.cardHeader}>
+                  <Text style={styles.title}>{name}</Text>
+                </View>
+
+                <View style={styles.cardFooter}>
+                  <Text style={styles.subTitleTop}> Rating: {rating} </Text>
+                  <Text style={styles.subTitle}> Type: {type[0]} </Text>
+                  <Text style={styles.subTitle}> Open Now: {open_now} </Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+                <View style={styles.cardHeader}>
+                  <Text style={styles.title}>Details</Text>
+                </View>
+
+                <View style={styles.cardFooter}>
+                  <Text style={styles.subTitleTop}> Phone: {phone} </Text>
+                  <Text style={styles.subTitle}> Website: {website} </Text>
+                  <Text style={styles.subTitle}> Address: {address} </Text>
+                  <Text style={styles.subTitle}> Price Level: {price_level} </Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+                <View style={styles.cardHeader}>
+                  <Text style={styles.title}>Opening Hours</Text>
+                </View>
+
+                <View style={styles.cardFooter}>
+                  <Text style={styles.subTitleTop}> {opening_hours[0]} </Text>
+                  <Text style={styles.subTitle}> {opening_hours[1]} </Text>
+                  <Text style={styles.subTitle}> {opening_hours[2]} </Text>
+                  <Text style={styles.subTitle}> {opening_hours[3]} </Text>
+                  <Text style={styles.subTitle}> {opening_hours[4]} </Text>
+                  <Text style={styles.subTitle}> {opening_hours[5]} </Text>
+                  <Text style={styles.subTitle}> {opening_hours[6]} </Text>
+
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+                <View style={styles.cardHeader}>
+                  <Text style={styles.title}>Reviews</Text>
+                </View>
+
+                <View style={styles.cardFooter}>
+
+                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
+                    <View style={styles.cardFooter}>
+                        <Text style={styles.subTitleReview}> Author Name: {review1author} </Text>
+                        <Text style={styles.subTitleReview}> Time: {review1time} </Text>
+                        <Text style={styles.subTitleReview}> Review: {review1text} </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
+                    <View style={styles.cardFooter}>
+                        <Text style={styles.subTitleReview}> Author Name: {review2author} </Text>
+                        <Text style={styles.subTitleReview}> Time: {review2time} </Text>
+                        <Text style={styles.subTitleReview}> Review: {review2text} </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
+                    <View style={styles.cardFooter}>
+                        <Text style={styles.subTitleReview}> Author Name: {review3author} </Text>
+                        <Text style={styles.subTitleReview}> Time: {review3time} </Text>
+                        <Text style={styles.subTitleReview}> Review: {review3text} </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
+                    <View style={styles.cardFooter}>
+                        <Text style={styles.subTitleReview}> Author Name: {review4author} </Text>
+                        <Text style={styles.subTitleReview}> Time: {review4time} </Text>
+                        <Text style={styles.subTitleReview}> Review: {review4text} </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                </View>
+              </TouchableOpacity>
             </Block>
-
-
-           
-
-            {/* <Block>
-              <View style={styles.container}>
-                <Card title="Local Modules">
-
-
-                  <Block style={{ flexDirection: 'row', alignContent: 'space-between', justifyContent: 'space-around' }}>
-
-                    <Block >
-                      <TouchableOpacity>
-                        <FontAwesome.Button
-                          style={{ width: 70, margin: 0, height: theme.SIZES.BASE * 3.5 }}
-                          name='phone'
-                          color="blue"
-                          backgroundColor='white'
-                          round
-                          size={40}
-                        >
-
-                        </FontAwesome.Button>
-                      </TouchableOpacity>
-                    </Block>
-                    <Block>
-                      <TouchableOpacity>
-                        <FontAwesome.Button
-                          style={{ width: 70, margin: 0, height: theme.SIZES.BASE * 3.5 }}
-                          name='arrow-right'
-                          color="blue"
-                          backgroundColor='white'
-                          round
-                          size={40}
-                          type='bar'
-                        >
-
-                        </FontAwesome.Button>
-                      </TouchableOpacity>
-                    </Block>
-
-                  </Block>
-
-                </Card>
-              </View>
-            </Block> */}
-
-
-           
-
-
-
-
-
-
-
           </ScrollView>
         </Block>
       </Block>
@@ -376,7 +428,69 @@ const styles = StyleSheet.create({
   group: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 0.4
+    flex: 0.35,
+  },
+  card: {
+    marginHorizontal: 2,
+    marginVertical: 2,
+    flexBasis: '48%',
+    // marginTop: 10
+  },
+  cardFooter: {
+    // flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 12.5,
+    paddingBottom: 25,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 1,
+    borderBottomRightRadius: 1,
+  },
+  icon: {
+    height: 20,
+    width: 20,
+  },
+  title: {
+    fontFamily: 'montserrat-regular',
+    fontSize: 26,
+    flex: 1,
+    color: "#FFFFFF",
+    fontWeight: '500'
+  },
+  titlereview: {
+    fontFamily: 'montserrat-regular',
+    fontSize: 26,
+    flex: 1,
+    color: "black",
+    fontWeight: '500'
+  },
+  subTitleTop: {
+    fontFamily: 'montserrat-regular',
+    fontSize: 16,
+    flex: 1,
+    color: "#FFFFFF",
+  },
+  subTitle: {
+    fontFamily: 'montserrat-regular',
+    fontSize: 16,
+    flex: 1,
+    color: "#FFFFFF",
+    marginTop: 10
+  },
+  subTitleReview: {
+    fontFamily: 'montserrat-regular',
+    fontSize: 16,
+    flex: 1,
+    color: "black",
+    marginTop: 10
+  },
+  cardHeader: {
+    paddingVertical: 5,
+    paddingHorizontal: 16,
+    borderTopLeftRadius: 1,
+    borderTopRightRadius: 1,
+    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center"
   },
   barContainer: {
     position: 'absolute',
@@ -415,5 +529,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#34495e',
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
   },
 });

@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { StyleSheet, SegmentedControlIOSComponent, } from "react-native";
+import { StyleSheet, SegmentedControlIOSComponent, View } from "react-native";
 import { AsyncStorage } from 'react-native';
 import Polyline from '@mapbox/polyline';
 import haversine from 'haversine-distance'
 var distance = require('euclidean-distance')
+import Spinner from 'react-native-loading-spinner-overlay';
 
 class createtrip extends Component {
     constructor(props) {
@@ -28,6 +29,8 @@ class createtrip extends Component {
             endingLongMarker: 0,
 
             places_nearby: [],
+            spinner: false,
+            query:""
 
 
 
@@ -38,29 +41,43 @@ class createtrip extends Component {
         this.function();
 
 
-        this.getDirections();
+        
     }
 
     async function() {
+        // let string;
+        this.setState({
+            spinner: true
+        });
         let departurePlaceID1 = "ChIJpe3UA-I4sz4R2HyQM4ea-pQ" // await AsyncStorage.getItem('departurePlaceID');
         let i = 0;
         var place = departurePlaceID1;
+        let finalstring="";
 
-        while (i < 6) {
+        while (i < 8) {
             let place1 = await this.getPlaces(place);
+            let string = "place_id:"+place1+"|";
+            finalstring = finalstring+string;
             await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1 + `&fields=name,place_id&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                 .then(res => res.json())
 
                 .then(res => {
-                    console.warn("location #" + i + ": " + res.result.name + " " + res.result.place_id)
+                    // console.warn("location #" + i + ": " + res.result.name + " " + res.result.place_id)
                 });
             place = place1;
             i = i + 1;
         }
-        // console.warn(place1);
+        console.warn(finalstring)
+        this.setState({
+            spinner: false
+        });
+        this.setState({query:finalstring})
+        this.getDirections();
     }
 
     TimeConversion(StartTime) {
+
+
         let hours = (StartTime.toString()).substring(0, 2);
         let minutes = (StartTime.toString()).substring(2, 4);
         let hours_seconds = parseInt(hours) * 60 * 60;
@@ -88,10 +105,8 @@ class createtrip extends Component {
 
         const markers = [];
 
-        let count = 1;
-
         //API for place details of starting location
-        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
             .then(res => res.json())
 
             .then(async api1 => {
@@ -100,14 +115,39 @@ class createtrip extends Component {
                 let startingLatitude = api1.result.geometry.location.lat;
                 let startingLongitude = api1.result.geometry.location.lng;
 
+                const marketObj = {};
+
+                marketObj.place_id = api1.result.place_id;
+
+                marketObj.name = api1.result.name;
+
+                marketObj.marker = {
+                    latitude: startingLatitude,
+                    longitude: startingLongitude
+                };
+                this.state.places_nearby.push(marketObj);
+
                 //API for place details of destination
-                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                     .then(res => res.json())
 
                     .then(async api2 => {
                         //Longitute and Latitude of destnation 
                         let endingLatitude = api2.result.geometry.location.lat;
                         let endingLongitude = api2.result.geometry.location.lng;
+
+
+                        const marketObj = {};
+
+                        marketObj.place_id = api2.result.place_id;
+
+                        marketObj.name = api2.result.name;
+
+                        marketObj.marker = {
+                            latitude: endingLatitude,
+                            longitude: endingLongitude
+                        };
+                        this.state.places_nearby.push(marketObj);
 
                         //Haversine Distance from Starting Location to destination
                         const a = { latitude: startingLatitude, longitude: startingLongitude }
@@ -124,8 +164,11 @@ class createtrip extends Component {
                                 //LOOP for all nearby from starting
                                 api3.results.map(async (element) => {
 
-                                    if (await element.place_id == await departurePlaceID1) {
-                                        console.warn("mana kara tha par phir bhe aya");
+                                    if (await element.place_id == destinationPlaceID1) {
+                                        console.warn("Hello I am equal");
+                                    }
+                                    else if (await element.place_id == await departurePlaceID1) {
+                                        // console.warn("mana kara tha par phir bhe aya");
                                     }
                                     else {
 
@@ -141,10 +184,9 @@ class createtrip extends Component {
 
                                         let DistanceStartToSpot = haversine(e, f);
                                         // console.warn(haversine(c, f)); 
-                                        // console.warn("distance start to spot  "+DistanceStartToSpot);
-                                        
 
-                                        if (await DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot>0) {
+
+                                        if (DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot > 0) {
 
                                             await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + element.place_id + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                                                 .then(res => res.json())
@@ -166,6 +208,7 @@ class createtrip extends Component {
 
                                                             //Closing Time of place
                                                             let CloseTime_place = this.TimeConversion(api5.result.opening_hours.periods[0].close.time);
+
                                                             if (CloseTime_place < 43200) {
                                                                 CloseTime_place = CloseTime_place + 86400;
                                                             }
@@ -175,7 +218,6 @@ class createtrip extends Component {
 
                                                             //Rating of place
                                                             let rating = api5.result.rating;
-
 
                                                             if (TimeToReachSpot >= OpenTime_place && TimeToReachSpot < CloseTime_place - 1800) {
                                                                 if (pricelevel == undefined || pricelevel == 3) {
@@ -191,7 +233,7 @@ class createtrip extends Component {
                                                                     if (rating == max) {
 
                                                                         while (i == 1) {
-                                                                            // console.warn(element.name)
+
                                                                             const marketObj = {};
                                                                             marketObj.id = element.id;
                                                                             marketObj.place_id = element.place_id;
@@ -204,29 +246,12 @@ class createtrip extends Component {
                                                                                 latitude: element.geometry.location.lat,
                                                                                 longitude: element.geometry.location.lng
                                                                             };
-                                                                            
-                                                                            if(marketObj!=null)
-                                                                            {
-                                                                                // console.warn(marketObj)
-                                                                                // console.warn("hi i am not emoty")
-                                                                                console.warn(element.name+" "+DistanceStartToSpot);
-                                                                                this.state.places_nearby.push(marketObj);
-                                                                                // console.warn(element.name+":"+this.state.places_nearby)
-                                                                                // this.state.places_nearby.push(marketObj);
-                                                                                // Object.assign(this.state.places_nearby,markers)
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                            //     console.warn("hi i am not emoty")
-                                                                            }
-                                                                            
-                                                                                
+
+                                                                            markers.push(element.name);
+
+                                                                            this.state.places_nearby.push(marketObj);
 
                                                                             i = i + 1;
-                                                                            // console.warn(element.place_id)
-                                                                            // return (element.place_id).toString();
-                                                                            // this.setState({ places_nearby: markers });
-                                                                            // console.warn("no hello" + DistanceStartToSpot)
                                                                             let FinalPlaceID = (element.place_id).toString();
                                                                             AsyncStorage.setItem('FinalPlace', FinalPlaceID);
                                                                         }
@@ -234,15 +259,37 @@ class createtrip extends Component {
                                                                 }
                                                             }
 
+                                                        })
+                                                        .catch(async api5error => {
+                                                            // console.warn("api5 error: "+  api5error);
+                                                            OpenTime_place = 43200;
+                                                            CloseTime_place = 86400;
                                                         });
 
+                                                })
+                                                .catch(async api4error => {
+                                                    // console.warn(error);
                                                 });
+
+
                                         }
                                     }
-                                });
+                                })
+                                    .catch(async api3looperror => {
+                                        // console.warn(error);
+                                    });
+                            })
+                            .catch(async api3error => {
+                                // console.warn(error);
                             });
 
+                    })
+                    .catch(async api2error => {
+                        // console.warn(error);
                     });
+            })
+            .catch(async api1error => {
+                // console.warn(error);
             });
 
         let FinalPlaceID = await AsyncStorage.getItem('FinalPlace');
@@ -252,6 +299,9 @@ class createtrip extends Component {
 
 
     async getDirections() {
+        const { startingLat, startingLong, places_nearby, query } = this.state;
+        console.warn(query);
+
         try {
             let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
             let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
@@ -259,10 +309,7 @@ class createtrip extends Component {
                 departurePlaceID: departurePlaceID1,
                 destinationPlaceID: destinationPlaceID1
             })
-            const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
-
-            // const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&waypoints=optimize:true|30.1575%2C71.5249&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
-            // const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=Adelaide,SA&destination=Connawarra,SA&waypoints=optimize:true|Barossa+Valley,SA|Clare,SA|Connawarra,SA|McLaren+Vale,SA&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
+            const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&waypoints=optimize:true|`+query+`&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
 
             const respJson = await resp.json();
             if (respJson.routes.length > 0) {
@@ -277,11 +324,6 @@ class createtrip extends Component {
                     startingLat: startingLat,
                     endingLat: endingLat,
                     endingLong: endingLong,
-
-                    startingLatMarker: startingLat,
-                    startingLongMarker: startingLong,
-                    endingLatMarker: endingLat,
-                    endingLongMarker: endingLong
 
                 })
 
@@ -305,64 +347,45 @@ class createtrip extends Component {
 
 
     render() {
-        const { startingLat, startingLong, places_nearby } = this.state;
-        // console.warn(places_nearby)
+        const { startingLat, startingLong, places_nearby, finalstring } = this.state;
 
-        // alert(this.state.startingLong);
         return (
-
-
-
-            <MapView style={styles.map} initialRegion={{
-                latitude: startingLat,
-                longitude: startingLong,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421
-            }}>
-
-                {places_nearby.map((marker, i) => (
-
-                    <MapView.Marker
-                        key={i}
-                        coordinate={{
-                            latitude: marker.marker.latitude,
-                            longitude: marker.marker.longitude
-                        }}
-                        title={marker.name}
-                    />
-                ))}
-
-                <MapView.Marker
-
-                    coordinate={{
-                        latitude: this.state.startingLatMarker,
-                        longitude: this.state.startingLongMarker,
-
-                    }}
-
-
-                />
-
-                <MapView.Marker
-
-                    coordinate={{
-                        latitude: this.state.endingLatMarker,
-                        longitude: this.state.endingLongMarker,
-
-                    }}
-
-
+            <View style={styles.container}>
+                <Spinner
+                    visible={this.state.spinner}
+                    textContent={'Preparing your trip'}
+                    textStyle={styles.spinnerTextStyle}
                 />
 
 
 
+                <MapView style={styles.map} initialRegion={{
+                    latitude: startingLat,
+                    longitude: startingLong,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421
+                }}>
 
-                <MapView.Polyline
-                    coordinates={this.state.coords}
-                    strokeWidth={2}
-                    strokeColor="red" />
+                    {places_nearby.map((marker, i) => (
 
-            </MapView>
+                        <MapView.Marker
+                            key={i}
+                            coordinate={{
+                                latitude: marker.marker.latitude,
+                                longitude: marker.marker.longitude
+                            }}
+                            title={marker.name}
+                        />
+                    ))}
+
+
+                    <MapView.Polyline
+                        coordinates={this.state.coords}
+                        strokeWidth={2}
+                        strokeColor="red" />
+
+                </MapView>
+            </View>
         );
     }
 
@@ -376,6 +399,15 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
+    },
+    spinnerTextStyle: {
+        color: '#FFF'
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F5FCFF'
     },
 });
 

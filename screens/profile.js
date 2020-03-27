@@ -7,116 +7,92 @@ import { Images, nowTheme } from '../constants';
 import { HeaderHeight } from '../constants/utils';
 
 const { width, height } = Dimensions.get('screen');
+import { AsyncStorage } from 'react-native';
+import { Card, CardImage, CardTitle, CardAction, CardContent, CardButton } from 'react-native-cards';
+import { getLightEstimationEnabled } from 'expo/build/AR';
 
 const thumbMeasure = (width - 48 - 32) / 3;
 
-const Profile = () => {
-  return (
+
+class Profile extends React.Component {
+  constructor(props) {
+    super(props);
+    //Initial State
+    this.state = {
+       email:"",
+       phone:"",
+       name:"",
+    };
+}
+
+  componentDidMount(){
+
+    this.getData();
     
-    <Block style={{
-      flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    }} >
-      <Block flex={0.6} >
-        <ImageBackground
-          source={Images.ProfileBackground}
-          style={styles.profileContainer}
-          imageStyle={styles.profileBackground}
-        >
-          <Block flex style={styles.profileCard}>
-            <Block style={{ position: 'absolute', width: width, zIndex: 5, paddingHorizontal: 20 }}>
-              <Block middle style={{ top: height * 0.15 }}>
-                <Image source={{uri: 'https://bootdey.com/img/Content/avatar/avatar6.png'}} style={styles.avatar} />
-              </Block>
-              <Block style={{ top: height * 0.2 }}>
-                <Block middle >
-                  <Text
-                    style={{
-                      fontFamily: 'montserrat-bold',
-                      marginBottom: theme.SIZES.BASE / 2,
-                      fontWeight: '900',
-                      fontSize: 26
-                    }}
-                    color='#ffffff'
-                    >
-                    Rabiya Salman
-                  </Text>
+  }
 
-                  <Text
-                    size={16}
-                    color="white"
-                    style={{
-                      marginTop: 5,
-                      fontFamily: 'montserrat-bold',
-                      lineHeight: 20,
-                      fontWeight: 'bold',
-                      fontSize: 18,
-                      opacity: .8
-                    }}
-                  >
-                    UI Designer / Mobile developer
-                  </Text>
-                </Block>
-                <Block style={styles.info}>
-                  <Block row space="around">
+  async getData()
+  {
+    let email1 = await AsyncStorage.getItem('email');
+    // console.warn(email1);
+    // fetch('http://192.168.43.139:3006/userprofile?Email='+email1+'')
+    fetch('http://192.168.43.139:3006/userprofile?Email=Rabia@g.com')
+    .then(res => res.json())
+        .then(user => {
 
+            if(user==0)
+            {
+              alert("invalid credentials");
+              
+            }
+            else
+            {
+              this.setState({
+                email: user[0].Email,
+                phone: user[0].Phone,
+                name: user[0].Name,
 
-                  </Block>
-                </Block>
-              </Block>
+              })
+            }           
+            
+        })
+  }
 
-            </Block>
+  render(){
+    const {email,name,phone} = this.state
+    return (
+      <Block style={{flex: 1}}>
+        <Block style={{flex: 0.4}}>
+          <Card>
+            <CardImage 
+              source={{uri: 'https://bootdey.com/img/Content/avatar/avatar6.png'}} 
+            />
+          </Card>
+        </Block>
 
-
-          </Block>
-        </ImageBackground>
-
-
+        <Block style={{flex: 0.6}}>
+          <Card>
+            <CardTitle
+              subtitle={name}
+              style={{alignItems: 'center'}}
+            />
+          </Card>
+          <Card>
+            <CardTitle
+              subtitle={email}
+              style={{alignItems: 'center'}}
+            />
+          </Card>
+          <Card>
+            <CardTitle
+              subtitle={phone}
+              style={{alignItems: 'center'}}
+            />
+          </Card>
+        </Block>
       </Block>
-      <Block />
-      <Block flex={0.4} style={{ padding: theme.SIZES.BASE, marginTop: 90}}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Block flex style={{ marginTop: 50 }}>
-            <Block middle>
-              <Text
-                style={{
-                  color: '#2c2c2c',
-                  fontWeight: 'bold',
-                  fontSize: 19,
-                  fontFamily: 'montserrat-bold',
-                  marginTop: 25,
-                  marginBottom: 20,
-                  zIndex: 2
-                }}
-              >
-                About me
-                  </Text>
-              <Text
-                size={16}
-                muted
-                style={{
-                  textAlign: 'center',
-                  fontFamily: 'montserrat-regular',
-                  zIndex: 2,
-                  lineHeight: 25,
-                  color: '#9A9A9A',
-                  paddingHorizontal: 15
-                }}
-              >
-                Hello, this is my easy safar profile page!
-                  </Text>
-            </Block>
-           
-
-
-           
-          </Block>
-        </ScrollView>
-      </Block>
-    </Block>
-
-  )
+    )
+  }
 }
 
 
@@ -148,8 +124,8 @@ const styles = StyleSheet.create({
   avatar: {
     width: thumbMeasure*1.5,
     height: thumbMeasure*1.5,
-    borderRadius: 100,
-    borderWidth: 0
+    borderRadius: 130,
+    borderWidth: 5
   },
   nameInfo: {
     marginTop: 35
@@ -170,5 +146,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 5
   }
 });
-
 export default Profile;
+

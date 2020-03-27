@@ -37,6 +37,31 @@ class SearchBar extends React.Component {
     }
   }
 
+  async onLogin() {
+
+
+    const { email, password } = this.state;
+
+    // await fetch('http://192.168.0.112:3006/userlogin?Email='+email+'&Password='+password+'')
+    // .then(res => res.json())
+    //   .then(users => {
+
+    //       if(users==1)
+    // {
+    // toast("Wow so easy !");
+    // alert("success");
+    
+    this.props.navigation.navigate('Details');
+    //     }
+    //     else
+    //     {
+    //       alert("invalid credentials");
+    //     }           
+
+    // })
+
+  }
+
   render() {
     return (
       <View style={{ flex: 1 }}>
@@ -48,20 +73,23 @@ class SearchBar extends React.Component {
           listViewDisplayed="auto" 
           fetchDetails={true}
           renderDescription={row => row.description} 
-          onPress={(data, details = null) => {
-            const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=`+details.place_id+`
-            &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
-            fetch(baseUrl)
-              .then(res => res.json())
+          // onPress={(data, details = null) => {
+          //   this.props.navigation.navigate('Onboarding');
+          //   const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=`+details.place_id+`
+          //   &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
+          //   fetch(baseUrl)
+          //     .then(res => res.json())
 
-              .then(res => {
-                alert(details.place_id);
-                console.warn(details.place_id);
+          //     .then(res => {
                 
-              });
+          //       alert(details.place_id);
+          //       console.warn(details.place_id);
+                
+          //     });
             
 
-          }}
+          // }}
+          onPress={this.onLogin.bind(this)}
           getDefaultValue={() => {
             return ''; // text input default value
           }}
