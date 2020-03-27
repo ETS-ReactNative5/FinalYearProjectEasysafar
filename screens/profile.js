@@ -2,14 +2,12 @@ import React from 'react';
 import { StyleSheet, Dimensions, ScrollView, Image, ImageBackground, Platform } from 'react-native';
 import { Block, Text, theme, Button as GaButton } from 'galio-framework';
 
-import { Button } from '../components';
 import { Images, nowTheme } from '../constants';
-import { HeaderHeight } from '../constants/utils';
 
 const { width, height } = Dimensions.get('screen');
 import { AsyncStorage } from 'react-native';
 import { Card, CardImage, CardTitle, CardAction, CardContent, CardButton } from 'react-native-cards';
-import { getLightEstimationEnabled } from 'expo/build/AR';
+
 
 const thumbMeasure = (width - 48 - 32) / 3;
 

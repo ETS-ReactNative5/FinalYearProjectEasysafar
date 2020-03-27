@@ -116,71 +116,56 @@ class Components extends Component {
         this.setState({ type: res.result.types });
         this.setState({ address: res.result.formatted_address });
 
-        if(res.result.formatted_phone_number == undefined)
-        {
+        if (res.result.formatted_phone_number == undefined) {
           this.setState({ phone: '-' });
         }
-        else
-        {
+        else {
           this.setState({ phone: res.result.formatted_phone_number });
         }
-        
-        
-        if(res.result.price_level == 0)
-        {
+
+
+        if (res.result.price_level == 0) {
           this.setState({ price_level: 'Free' });
         }
-        else if(res.result.price_level == 1)
-        {
+        else if (res.result.price_level == 1) {
           this.setState({ price_level: 'Inexpensive' });
         }
-        else if(res.result.price_level == 2)
-        {
+        else if (res.result.price_level == 2) {
           this.setState({ price_level: 'Moderate' });
         }
-        else if(res.result.price_level == 3)
-        {
+        else if (res.result.price_level == 3) {
           this.setState({ price_level: 'Expensive' });
         }
-        else if(res.result.price_level == 4)
-        {
+        else if (res.result.price_level == 4) {
           this.setState({ price_level: 'Very Expensive' });
         }
-        else
-        {
+        else {
           this.setState({ price_level: '-' });
         }
 
-        if(res.result.website == undefined)
-        {
+        if (res.result.website == undefined) {
           this.setState({ website: '-' });
         }
-        else
-        {
+        else {
           this.setState({ website: res.result.website });
         }
-        
-        if(res.result.opening_hours.weekday_text == undefined)
-        {
+
+        if (res.result.opening_hours.weekday_text == undefined) {
           this.setState({ opening_hours: '-' });
         }
-        else
-        {
+        else {
           this.setState({ opening_hours: res.result.opening_hours.weekday_text });
         }
-        
-        
 
-        if(res.result.opening_hours.open_now == undefined)
-        {
+
+
+        if (res.result.opening_hours.open_now == undefined) {
           this.setState({ open_now: '-' });
         }
-        else if(res.result.opening_hours.open_now == false)
-        {
+        else if (res.result.opening_hours.open_now == false) {
           this.setState({ open_now: 'Closed' });
         }
-        else
-        {
+        else {
           this.setState({ open_now: 'Open' });
         }
 
@@ -334,9 +319,15 @@ class Components extends Component {
               <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>{name}</Text>
+                  <TouchableOpacity
+                    onPress={() => { this.props.navigation.navigate("addreview"); }}>
+                    <Text style={styles.subTitle}>Add Review</Text></TouchableOpacity>
+
                 </View>
 
                 <View style={styles.cardFooter}>
+
+
                   <Text style={styles.subTitleTop}> Rating: {rating} </Text>
                   <Text style={styles.subTitle}> Type: {type[0]} </Text>
                   <Text style={styles.subTitle}> Open Now: {open_now} </Text>
@@ -382,33 +373,33 @@ class Components extends Component {
 
                   <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
                     <View style={styles.cardFooter}>
-                        <Text style={styles.subTitleReview}> Author Name: {review1author} </Text>
-                        <Text style={styles.subTitleReview}> Time: {review1time} </Text>
-                        <Text style={styles.subTitleReview}> Review: {review1text} </Text>
+                      <Text style={styles.subTitleReview}> Author Name: {review1author} </Text>
+                      <Text style={styles.subTitleReview}> Time: {review1time} </Text>
+                      <Text style={styles.subTitleReview}> Review: {review1text} </Text>
                     </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
                     <View style={styles.cardFooter}>
-                        <Text style={styles.subTitleReview}> Author Name: {review2author} </Text>
-                        <Text style={styles.subTitleReview}> Time: {review2time} </Text>
-                        <Text style={styles.subTitleReview}> Review: {review2text} </Text>
+                      <Text style={styles.subTitleReview}> Author Name: {review2author} </Text>
+                      <Text style={styles.subTitleReview}> Time: {review2time} </Text>
+                      <Text style={styles.subTitleReview}> Review: {review2text} </Text>
                     </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
                     <View style={styles.cardFooter}>
-                        <Text style={styles.subTitleReview}> Author Name: {review3author} </Text>
-                        <Text style={styles.subTitleReview}> Time: {review3time} </Text>
-                        <Text style={styles.subTitleReview}> Review: {review3text} </Text>
+                      <Text style={styles.subTitleReview}> Author Name: {review3author} </Text>
+                      <Text style={styles.subTitleReview}> Time: {review3time} </Text>
+                      <Text style={styles.subTitleReview}> Review: {review3text} </Text>
                     </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
                     <View style={styles.cardFooter}>
-                        <Text style={styles.subTitleReview}> Author Name: {review4author} </Text>
-                        <Text style={styles.subTitleReview}> Time: {review4time} </Text>
-                        <Text style={styles.subTitleReview}> Review: {review4text} </Text>
+                      <Text style={styles.subTitleReview}> Author Name: {review4author} </Text>
+                      <Text style={styles.subTitleReview}> Time: {review4time} </Text>
+                      <Text style={styles.subTitleReview}> Review: {review4text} </Text>
                     </View>
                   </TouchableOpacity>
 
@@ -484,6 +475,7 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   cardHeader: {
+    // flexDirection:'row',
     paddingVertical: 5,
     paddingHorizontal: 16,
     borderTopLeftRadius: 1,

@@ -17,7 +17,7 @@ import GuidePlaceType from '../screens/GuidePlaceType';
 import GuidePlaceResult from '../screens/GuidePlaceResult';
 import profile from '../screens/profile';
 import TripMapPage from '../screens/TripMapPage';
-import SeachBar from '../screens/SearchBar'
+import addreview from '../screens/addreview'
 
 
 // drawer 
@@ -99,7 +99,16 @@ const GuidesStack = createStackNavigator(
         ),
         headerTransparent: true
       })
-    }
+    },
+    addreview: {
+      screen: addreview,
+      navigationOptions: ({ navigation }) => ({
+        header: (
+          <Header transparent title="Add Review" iconColor={'#333'} navigation={navigation} />
+        ),
+        headerTransparent: true
+      })
+    },
   },
   
   
@@ -180,7 +189,16 @@ const HomeStack = createStackNavigator(
         ),
         headerTransparent: true
       })
-    }
+    },
+    addreview: {
+      screen: addreview,
+      navigationOptions: ({ navigation }) => ({
+        header: (
+          <Header transparent title="Add Review" iconColor={'#333'} navigation={navigation} />
+        ),
+        headerTransparent: true
+      })
+    },
   }, 
   {
     cardStyle: {
