@@ -18,11 +18,12 @@ class addreview extends React.Component {
     super(props);
     //Initial State
     this.state = {
-      
+
       rating: "",
-      review:"",
-      placename:"",
-      authorname:""
+      review: "",
+      placename: "",
+      authorname: "",
+      spinner: false,
 
     };
   }
@@ -34,26 +35,51 @@ class addreview extends React.Component {
   async getData() {
 
     const markers = [];
-    let ip = await AsyncStorage.getItem('ip');
+    let placename = await AsyncStorage.getItem('PlaceName');
+    // alert(placeename)
+    this.setState({
+      placename: placename
+    })
 
-    await fetch('http://' + ip + ':3006/fypnames ')
-      .then(res => res.json())
 
-      .then(res => {
-        
-
-      });
   }
 
   async Submit() {
-   
+    // alert("Submitted");
+    let placeid = await AsyncStorage.getItem('placeid');
+    let email = await AsyncStorage.getItem('Email');
+
+
+    const { review, status } = this.state;
+    // setTimeout(() => {
+    this.setState({
+      spinner: true
+    });
+    // }, 7000);
+    // alert(status);
+    await fetch('http://192.168.0.107:3006/addreview?PlaceID=' + placeid + '&Email=' + email + '&Review=' + review + '&Rating=' + status + ' ')
+      .then(users => {
+
+        alert("inserted");
+        this.props.navigation.navigate("Details");
+      })
+      .catch(res => {
+
+      });
+
+    setTimeout(() => {
+      this.setState({
+        spinner: false
+      });
+    }, 4000);
+
   }
 
   renderHeading = () => {
     return (
       <Block flex style={styles.group}>
         <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-         
+
           <Text
             h4
             style={{
@@ -62,9 +88,9 @@ class addreview extends React.Component {
             }}
             color={nowTheme.COLORS.HEADER}
           >
-            Place Name
+            {this.state.placename}
           </Text>
-         
+
         </Block>
       </Block>
     );
@@ -76,19 +102,19 @@ class addreview extends React.Component {
   }
 
   async setData() {
-    
+
     let ip = await AsyncStorage.getItem('ip');
 
     await fetch('')
-    .then(res => res.json())
-    .then(users => {
+      .then(res => res.json())
+      .then(users => {
 
         this.setState({
-            
+
 
         })
 
-    })
+      })
   }
 
   renderRating = () => {
@@ -122,7 +148,7 @@ class addreview extends React.Component {
     );
 
 
-  }; 
+  };
 
   renderComments = () => {
     return (
@@ -163,6 +189,7 @@ class addreview extends React.Component {
   render() {
     return (
       <Block flex center>
+
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
 
           {this.renderHeading()}
@@ -194,15 +221,15 @@ class addreview extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    buttonContainer: {
-        paddingHorizontal: theme.SIZES.BASE * 4,
-        marginBottom: theme.SIZES.BASE,
-        justifyContent: "center",
-        width: width,
-        height: theme.SIZES.BASE * 4,
-        shadowRadius: 0,
-        shadowOpacity: 0
-      },
+  buttonContainer: {
+    paddingHorizontal: theme.SIZES.BASE * 4,
+    marginBottom: theme.SIZES.BASE,
+    justifyContent: "center",
+    width: width,
+    height: theme.SIZES.BASE * 4,
+    shadowRadius: 0,
+    shadowOpacity: 0
+  },
   button: {
     backgroundColor: "#3b5998",
     color: "white"
@@ -226,7 +253,7 @@ const styles = StyleSheet.create({
   formInput: {
     borderBottomWidth: 1.5,
     fontSize: 16,
-    color:'black'
+    color: 'black'
   },
   input1: {
     borderWidth: 0,

@@ -18,7 +18,8 @@ import GuidePlaceResult from '../screens/GuidePlaceResult';
 import profile from '../screens/profile';
 import TripMapPage from '../screens/TripMapPage';
 import addreview from '../screens/addreview'
-
+import makeowntrip from '../screens/makeowntrip'
+import OwnTripMapPage from '../screens/OwnTripMapPage'
 
 // drawer 
 import Menu from './Menu';
@@ -143,6 +144,32 @@ const createtripStack = createStackNavigator(
   }
 );
 
+const MakeowntripStack = createStackNavigator(
+  {
+    makeowntrip: {
+      screen: makeowntrip,
+      navigationOptions: ({ navigation }) => ({
+        header: (
+          <Header transparent title="Make my own trip" iconColor={'#333'} navigation={navigation} />
+        ),
+        headerTransparent: true
+      })
+    },
+    OwnTripMapPage: {
+      screen: OwnTripMapPage,
+      navigationOptions: ({ navigation }) => ({
+        header: (
+          <Header transparent title="OwnTripMapPage" iconColor={'#333'} navigation={navigation} />
+        ),
+        headerTransparent: true
+      })
+    },
+  },
+  {
+    cardStyle: { backgroundColor: '#FFFFFF' },
+    transitionConfig
+  }
+);
 
 
 const ProfileStack = createStackNavigator(
@@ -242,6 +269,14 @@ const AppStack = createDrawerNavigator(
       navigationOptions: navOpt => ({
         drawerLabel: ({ focused }) => (
           <DrawerItem focused={focused} screen="Guides" title="Guides" />
+        )
+      })
+    },
+    Makeowntrip: {
+      screen: MakeowntripStack,
+      navigationOptions: navOpt => ({
+        drawerLabel: ({ focused }) => (
+          <DrawerItem focused={focused} screen="makeowntrip" title="Make my own trip" />
         )
       })
     },

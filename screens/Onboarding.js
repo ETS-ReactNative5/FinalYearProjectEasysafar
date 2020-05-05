@@ -4,6 +4,7 @@ import { Block, Text, theme } from 'galio-framework';
 import { Button } from 'react-native-elements';
 const { height, width } = Dimensions.get('screen');
 import Spinner from 'react-native-loading-spinner-overlay';
+import { AsyncStorage } from 'react-native';
 // import { toast } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
@@ -41,7 +42,8 @@ export default class Onboarding extends React.Component {
     // alert("success");
     this.setState({
       spinner: false
-  });
+    });
+    AsyncStorage.setItem('Email', 'ahsanshah2398@gmail.com');
     this.props.navigation.navigate('Home');
     //     }
     //     else

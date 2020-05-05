@@ -60,6 +60,8 @@ class Components extends Component {
       review2text: "",
       review3text: "",
       review4text: "",
+      userreview: "",
+      userrating: "",
 
       review1time: "",
       review2time: "",
@@ -67,6 +69,10 @@ class Components extends Component {
       review4time: "",
     };
   }
+
+  // async componentWillUnmount(){
+  //   await this.getReview()  
+  // }
 
   componentDidMount() {
     setTimeout(() => {
@@ -76,6 +82,8 @@ class Components extends Component {
     }, 7000);
 
     this.displayData()
+    this.getReview()  
+   
   }
 
   displayData = async () => {
@@ -84,6 +92,7 @@ class Components extends Component {
 
       this.setState({ placeid: placeid });
       this.getPlaces(placeid);
+      
 
     }
     catch (error) {
@@ -194,15 +203,40 @@ class Components extends Component {
 
   }
 
+  async getReview() {
+
+    // alert("placeid");
+    let placeid = await AsyncStorage.getItem('placeid');
+    let email = await AsyncStorage.getItem('Email');
+
+    // const url = this.getPlacesUrl(place, GOOGLE_API_KEY);
+    await fetch('http://192.168.0.107:3006/getreview?Email='+email+'&PlaceID=' + placeid + ' ')
+      .then(res => res.json())
+
+      .then(res => {
+        // alert(res[0].Review);
+        // console.log(res[0].Review)
+        this.setState({ userreview: res[0].Review });
+        this.setState({ userrating: res[0].Rating });
+        
+
+      })
+      .catch(res => {
+
+      });
+
+
+  }
+
   render() {
     const { name, rating, type, address, placeid, phone, image1url, image2url, image3url, image4url, image5url, website, price_level,
       opening_hours, open_now, review1author, review1text, review1time, review2author, review2text, review2time, review3author, review3text,
-      review3time, review4author, review4text, review4time } = this.state;
+      review3time, review4author, review4text, review4time, userreview, userrating } = this.state;
     let imageArray = []
     let barArray = []
-    // console.warn(reviews);
+
     images.forEach((image, i) => {
-      // console.log(image, i)
+
       const thisImage = (
         <Image
           key={`image${i}`}
@@ -320,7 +354,11 @@ class Components extends Component {
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>{name}</Text>
                   <TouchableOpacity
-                    onPress={() => { this.props.navigation.navigate("addreview"); }}>
+
+                    onPress={() => {
+                      AsyncStorage.setItem('PlaceName', name);
+                      this.props.navigation.navigate("addreview");
+                    }}>
                     <Text style={styles.subTitle}>Add Review</Text></TouchableOpacity>
 
                 </View>
@@ -400,6 +438,16 @@ class Components extends Component {
                       <Text style={styles.subTitleReview}> Author Name: {review4author} </Text>
                       <Text style={styles.subTitleReview}> Time: {review4time} </Text>
                       <Text style={styles.subTitleReview}> Review: {review4text} </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                    
+                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
+                    <View style={styles.cardFooter}> 
+                    <Text style={styles.Title}> Your Review </Text>
+                      {/* <Text style={styles.subTitleReview}> Author Name: {review4author} </Text> */}
+                      <Text style={styles.subTitleReview}> Review: {userreview} </Text>
+                      <Text style={styles.subTitleReview}> Rating: {userrating} </Text>
                     </View>
                   </TouchableOpacity>
 

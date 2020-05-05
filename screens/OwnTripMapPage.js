@@ -49,24 +49,18 @@ class createtrip extends Component {
         this.setState({
             spinner: true
         });
-        let departurePlaceID1 =  await AsyncStorage.getItem('departurePlaceID');
-        let i = 0;
-        var place = departurePlaceID1;
+        var PlacesSelected =  await AsyncStorage.getItem('PlacesSelected');
+        let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
+        let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
+
+        var PlacesArray = PlacesSelected.split(',');
         let finalstring="";
-
-        while (i < 8) {
-            let place1 = await this.getPlaces(place);
-            let string = "place_id:"+place1+"|";
+        for(var i=0;i<PlacesArray.length;i++)
+        {
+            let string = "place_id:"+PlacesArray[i]+"|";
             finalstring = finalstring+string;
-            await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1 + `&fields=name,place_id&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
-                .then(res => res.json())
-
-                .then(res => {
-                    // console.warn("location #" + i + ": " + res.result.name + " " + res.result.place_id)
-                });
-            place = place1;
-            i = i + 1;
         }
+
         console.warn(finalstring)
         this.setState({
             spinner: false
@@ -300,7 +294,7 @@ class createtrip extends Component {
 
     async getDirections() {
         const { startingLat, startingLong, places_nearby, query } = this.state;
-        console.warn(query);
+        // console.warn(query);
 
         try {
             let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
@@ -309,6 +303,7 @@ class createtrip extends Component {
                 departurePlaceID: departurePlaceID1,
                 destinationPlaceID: destinationPlaceID1
             })
+            console.log(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&waypoints=optimize:true|`+query+`&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
             const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&waypoints=optimize:true|`+query+`&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
 
             const respJson = await resp.json();
@@ -317,6 +312,8 @@ class createtrip extends Component {
                 const startingLat = respJson.routes[0].legs[0].start_location.lat;
                 const endingLat = respJson.routes[0].legs[0].end_location.lat;
                 const endingLong = respJson.routes[0].legs[0].end_location.lng;
+
+                // alert("Hello")
 
 
                 this.setState({
@@ -343,7 +340,6 @@ class createtrip extends Component {
             alert(error);
         }
     }
-
 
 
     render() {
