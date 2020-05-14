@@ -437,7 +437,7 @@ class createtrip extends Component {
         var maxIndex = 0;
 
         var PlaceID = "";
-        var flag = 0;
+        var flag = 0;     
 
         return new Promise(function (resolve, reject) {
             fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,photos,name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
