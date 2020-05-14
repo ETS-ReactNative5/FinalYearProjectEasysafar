@@ -137,20 +137,29 @@ class createtrip extends Component {
                             longitude: endingLongitude
                         };
 
+                        //Haversine Distance from Starting Location to destination
+                        const a = { latitude: startingLatitude, longitude: startingLongitude }
+                        const b = { latitude: endingLatitude, longitude: endingLongitude }
+
+                        let distanceStartToEnd = haversine(a, b);
+
                         var SpotToDestination = 100000;
+
+                        var flag = false;
+
                         let finalstring = "";
 
                         let i = 0;
                         var place = departurePlaceID1;
-                        var radius = 2000; 
+                        var radius = 2000;
 
-                        while (i < 10) {
+                        while (SpotToDestination > 1000) {
                             i = i + 1;
 
                             var place1 = await this.PickRestaurant(place, radius);
 
                             if (place1.length > 0) {
-                                console.log("PLACE FOUND " + place1)
+
                                 await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1 + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                                     .then(res => res.json())
 
@@ -164,7 +173,7 @@ class createtrip extends Component {
 
                                         SpotToDestination = haversine(c, d);
 
-                                        console.warn("Spot To Destination: " + SpotToDestination)
+                                        console.warn(SpotToDestination + " " + intermediate.result.name)
 
                                         const intermediateObj = {};
 
@@ -202,7 +211,7 @@ class createtrip extends Component {
                             else {
                                 console.log("NULL " + place)
                                 console.warn("NULL " + place)
-                                radius = radius  * 2;
+                                radius = radius * 2;
                                 place = place;
 
                             }
@@ -226,10 +235,6 @@ class createtrip extends Component {
 
     }
 
-    async getmessage() {
-
-    }
-
     TimeConversion(StartTime) {
 
 
@@ -241,7 +246,7 @@ class createtrip extends Component {
     }
 
     async PickRestaurant(departurePlaceID1, radius) {
-     
+
         var array = [];
 
         //Destination ID
@@ -339,7 +344,7 @@ class createtrip extends Component {
                                                             j++;
 
 
-                                                            if (DistanceSpotToDestination < distanceStartToEnd ) {
+                                                            if (DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot > 1000) {
                                                                 let rating = api5.result.rating;
 
                                                                 if (api5.result.opening_hours != undefined) {
@@ -364,9 +369,178 @@ class createtrip extends Component {
 
 
                                                                     // if (TimeToReachSpot >= OpenTime_place && TimeToReachSpot < CloseTime_place - 1800) {
-                                                                        if (rating > max1) {
-                                                                            PlaceID = element.place_id;
-                                                                        }
+                                                                    if (rating > max1) {
+                                                                        PlaceID = element.place_id;
+                                                                    }
+                                                                    // }
+
+                                                                    if (api3.results.length == j) {
+                                                                        resolve(PlaceID)
+                                                                    }
+
+                                                                }
+
+
+                                                            }
+
+                                                            else {
+
+                                                                if (api3.results.length == j) {
+                                                                    //console.warn(PlaceID);
+                                                                    resolve(PlaceID)
+
+                                                                }
+                                                            }
+
+
+                                                        })
+                                                        .catch(async api5error => {
+                                                            console.warn("API5 " + api5error)
+
+                                                        });
+                                                    //
+
+                                                });
+
+
+                                        }
+
+                                    })
+
+
+                                })
+
+                        })
+
+                })
+        });
+
+    }
+
+    async PickSpot(departurePlaceID1, radius) {
+
+        //Destination ID
+        let destinationPlaceID1 = "ChIJDZUT1dY9sz4RJniLuy58ltM";  //await AsyncStorage.getItem('destinationPlaceID'); 
+
+        //Start Time in seconds
+        let StartTime = await AsyncStorage.getItem('TripStartTime');
+        let StartTripTime_seconds = this.TimeConversion(StartTime);
+
+        //End Time in seconds
+        let EndTime = await AsyncStorage.getItem('TripEndTime');
+        let EndTripTime_seconds = this.TimeConversion(EndTime);
+
+        let i = 1;
+
+        //Max for rating
+        var max1 = 1.00;
+        var maxIndex = 0;
+
+        var PlaceID = "";
+        var flag = 0;
+
+        return new Promise(function (resolve, reject) {
+            fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,photos,name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                .then(res => res.json())
+
+                .then(api1 => {
+
+                    //Longitute and Latitude of starting location 
+                    let startingLatitude = api1.result.geometry.location.lat;
+                    let startingLongitude = api1.result.geometry.location.lng;
+
+                    fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                        .then(res => res.json())
+
+                        .then(api2 => {
+                            //Longitute and Latitude of destnation 
+                            let endingLatitude = api2.result.geometry.location.lat;
+                            let endingLongitude = api2.result.geometry.location.lng;
+
+
+                            //Haversine Distance from Starting Location to destination
+                            const a = { latitude: startingLatitude, longitude: startingLongitude }
+                            const b = { latitude: endingLatitude, longitude: endingLongitude }
+
+                            let distanceStartToEnd = haversine(a, b);
+
+                            //API for places nearby starting location
+                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=restaurant&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                .then(res => res.json())
+
+                                .then(async api3 => {
+
+                                    //LOOP for all nearby from starting
+                                    var j = 1
+
+                                    api3.results.map((element, index) => {
+
+                                        // if (await element.place_id.toString() != departurePlaceID1.toString()) {
+
+                                        if (element.place_id == destinationPlaceID1) {
+                                            console.warn("Hello I am equal");
+                                        }
+                                        else if (element.place_id == departurePlaceID1) {
+
+                                        }
+                                        else {
+                                            const c = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
+                                            const d = { latitude: endingLatitude, longitude: endingLongitude }
+
+                                            let DistanceSpotToDestination = haversine(c, d);
+
+                                            //Haversine Distance from Starting Location to Spot
+                                            const e = { latitude: startingLatitude, longitude: startingLongitude }
+                                            const f = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
+
+                                            let DistanceStartToSpot = haversine(e, f);
+
+                                            fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + element.place_id + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                                .then(res => res.json())
+
+                                                .then(api4 => {
+                                                    //Time taken to reach from starting to spot 
+                                                    let TravellingTime = api4.rows[0].elements[0].duration.value;
+
+                                                    //TOTAL WHEN WE WILL REACH FROM STARTING TO SPOT
+                                                    let TimeToReachSpot = StartTripTime_seconds + TravellingTime;
+
+                                                    fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + element.place_id + `&fields=opening_hours,price_level,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                                        .then(res => res.json())
+
+                                                        .then(async api5 => {
+
+                                                            j++;
+
+
+                                                            if (DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot > 1000) {
+                                                                let rating = api5.result.rating;
+
+                                                                if (api5.result.opening_hours != undefined) {
+                                                                    let StartTime = await api5.result.opening_hours.periods[0].open.time;
+                                                                    let Starthours = (StartTime.toString()).substring(0, 2);
+                                                                    let Startminutes = (StartTime.toString()).substring(2, 4);
+                                                                    let Starthours_seconds = parseInt(Starthours) * 60 * 60;
+                                                                    let Startminutes_seconds = parseInt(Startminutes) * 60;
+                                                                    let OpenTime_place = Starthours_seconds + Startminutes_seconds;
+
+                                                                    let CloseTime = await api5.result.opening_hours.periods[0].open.time;
+                                                                    let Closehours = (CloseTime.toString()).substring(0, 2);
+                                                                    let Closeminutes = (CloseTime.toString()).substring(2, 4);
+                                                                    let Closehours_seconds = parseInt(Closehours) * 60 * 60;
+                                                                    let Closeminutes_seconds = parseInt(Closeminutes) * 60;
+                                                                    let CloseTime_place = Closehours_seconds + Closeminutes_seconds;
+
+                                                                    if (CloseTime_place < 43200) {
+                                                                        CloseTime_place = CloseTime_place + 86400;
+                                                                    }
+
+
+
+                                                                    // if (TimeToReachSpot >= OpenTime_place && TimeToReachSpot < CloseTime_place - 1800) {
+                                                                    if (rating > max1) {
+                                                                        PlaceID = element.place_id;
+                                                                    }
                                                                     // }
 
                                                                     if (api3.results.length == j) {
