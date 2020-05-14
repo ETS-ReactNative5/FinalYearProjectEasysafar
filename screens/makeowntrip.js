@@ -189,7 +189,7 @@ export default class makeowntrip extends Component {
                 </Block>
 
 
-                <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1 }}>
+                {/* <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1 }}>
 
                     <GooglePlacesAutocomplete
                         placeholder="Departure Location"
@@ -279,7 +279,7 @@ export default class makeowntrip extends Component {
                         );
                     }
                     }
-                />
+                /> */}
 
                 <Block style={styles.buttonContainer}>
                     <Button

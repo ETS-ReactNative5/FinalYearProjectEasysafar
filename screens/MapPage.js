@@ -75,7 +75,7 @@ class MapScreen extends Component {
   getPlaces() {
     const { lat, long, type } = this.state;
     const markers = [];
-    const url = this.getPlacesUrl(lat, long, 5000, type, GOOGLE_API_KEY);
+    const url = this.getPlacesUrl(lat, long, 10000, type, GOOGLE_API_KEY);
     fetch(url)
       .then(res => res.json())
 
