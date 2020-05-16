@@ -307,6 +307,7 @@ class createtrip extends React.Component {
 
               AsyncStorage.setItem('TripStartTime', '1200');
               AsyncStorage.setItem('TripEndTime', '2200');
+              AsyncStorage.setItem('OptiosnSelected', 'tourist_attraction,restaurant');
               this.props.navigation.navigate("TripMapPage");
 
             }}

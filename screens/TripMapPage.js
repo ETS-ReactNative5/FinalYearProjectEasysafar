@@ -68,11 +68,14 @@ class createtrip extends Component {
     componentDidMount() {
         this.function();
 
-
     }
 
     async function() {
 
+        var TypesSelected = await AsyncStorage.getItem('OptiosnSelected');
+        var TypesSelectedArray = TypesSelected.split(",");
+
+        console.warn(TypesSelectedArray)
         // this.setState({
         //     spinner: true
         // });
@@ -167,18 +170,25 @@ class createtrip extends Component {
                             radius = 50000
                         }
 
-                        // console.warn(radius)
-
-
                         var count = 0;
+
+                        var check = 0;
 
                         while (SpotToDestination > 1000) {
                             // while (i < 2) {
 
                             i = i + 1;
 
-                            var place1 = await this.PickRestaurant(place, radius);
+                            // if(check%2==0)
+                            // {
+                            //     var place1 = await this.PickRestaurant(place, radius);
+                            // }
+                            // else
+                            // {
+                            var place1 = await this.PickSpot(place, radius);
+                            // }
 
+                            check++;
 
                             place1 = place1.split(",");
 
@@ -369,11 +379,11 @@ class createtrip extends Component {
 
                                 .then(async api3 => {
                                     //LOOP for all nearby from starting
-                                    var j = 1
+                                    var j = 0;
 
                                     api3.results.map((element, index) => {
 
-                                        console.warn(index + " " + element.name + "  " + j);
+
 
                                         if (element.place_id == destinationPlaceID1) {
 
@@ -415,8 +425,6 @@ class createtrip extends Component {
 
                                                                 let rating = api5.result.rating;
 
-
-
                                                                 if (api5.result.opening_hours != undefined) {
                                                                     let StartTime = await api5.result.opening_hours.periods[0].open.time;
                                                                     let Starthours = (StartTime.toString()).substring(0, 2);
@@ -440,23 +448,24 @@ class createtrip extends Component {
 
                                                                         if ("ChIJq6rO6fw4sz4RS1G5MpYOvuw" != element.place_id) {
                                                                             if (rating > max1) {
-                                                                                max1 = rating
 
+                                                                                max1 = rating
                                                                                 PlaceID = element.place_id + "," + TravellingTime;
                                                                             }
                                                                         }
 
                                                                     }
-
-                                                                    if (api3.results.length == j) {
+                                                                    // console.warn(api3.results.length + " " + j + " " + index)
+                                                                    if (api3.results.length == j + 1) {
+                                                                        // console.warn(index + " " + element.name + "  " + j);
                                                                         resolve(PlaceID)
                                                                     }
                                                                 }
                                                             }
 
                                                             else {
-
-                                                                if (api3.results.length == j) {
+                                                                // console.warn(api3.results.length + " " + j + " " + index)
+                                                                if (api3.results.length == j + 1) {
 
                                                                     resolve(PlaceID)
 
@@ -475,6 +484,196 @@ class createtrip extends Component {
 
                                                 });
                                         }
+                                    })
+                                })
+                                .catch(async api5error => {
+                                    console.warn("API3 " + api5error)
+
+                                });
+
+                        })
+                        .catch(async api5error => {
+                            console.warn("API2 " + api5error)
+
+                        });
+                })
+                .catch(async api5error => {
+                    console.warn("API1 " + api5error)
+
+                });
+        });
+    }
+
+    async PickSpot(departurePlaceID1, radius) {
+
+        var array = [];
+
+        //Destination ID
+        let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
+        // let destinationPlaceID1 = "ChIJDZUT1dY9sz4RJniLuy58ltM"; 
+
+        //Start Time in seconds
+        let StartTime = await AsyncStorage.getItem('TripStartTime');
+        let StartTripTime_seconds = this.TimeConversion(StartTime);
+
+        //End Time in seconds
+        let EndTime = await AsyncStorage.getItem('TripEndTime');
+        let EndTripTime_seconds = this.TimeConversion(EndTime);
+
+        let i = 1;
+
+        //Max for rating
+        var max1 = 1.00;
+        var maxIndex = 0;
+
+        var PlaceID = "";
+        var flag = 0;
+
+        // await AsyncStorage.removeItem('placeratings');
+        return new Promise(function (resolve, reject) {
+            fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,photos,name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                .then(res => res.json())
+
+                .then(api1 => {
+
+                    //Longitute and Latitude of starting location 
+                    let startingLatitude = api1.result.geometry.location.lat;
+                    let startingLongitude = api1.result.geometry.location.lng;
+
+                    fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                        .then(res => res.json())
+
+                        .then(api2 => {
+                            //Longitute and Latitude of destnation 
+                            let endingLatitude = api2.result.geometry.location.lat;
+                            let endingLongitude = api2.result.geometry.location.lng;
+
+
+                            //Haversine Distance from Starting Location to destination
+                            const a = { latitude: startingLatitude, longitude: startingLongitude }
+                            const b = { latitude: endingLatitude, longitude: endingLongitude }
+
+                            let distanceStartToEnd = haversine(a, b);
+
+                            //API for places nearby starting location
+                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=tourist_attraction&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                .then(res => res.json())
+
+                                .then(async api3 => {
+                                    //LOOP for all nearby from starting
+                                    var j = 0;
+
+                                    api3.results.map((element, index) => {
+
+
+
+
+                                        const c = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
+                                        const d = { latitude: endingLatitude, longitude: endingLongitude }
+
+                                        let DistanceSpotToDestination = haversine(c, d);
+
+                                        //Haversine Distance from Starting Location to Spot
+                                        const e = { latitude: startingLatitude, longitude: startingLongitude }
+                                        const f = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
+
+                                        let DistanceStartToSpot = haversine(e, f);
+
+                                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + element.place_id + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                            .then(res => res.json())
+
+                                            .then(api4 => {
+                                                //Time taken to reach from starting to spot 
+                                                let TravellingTime = api4.rows[0].elements[0].duration.value;
+
+                                                //TOTAL WHEN WE WILL REACH FROM STARTING TO SPOT
+                                                let TimeToReachSpot = StartTripTime_seconds + TravellingTime;
+
+                                                fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + element.place_id + `&fields=opening_hours,price_level,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                                    .then(res => res.json())
+
+                                                    .then(async api5 => {
+
+                                                        if (DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot > 1000) {
+                                                            // console.warn(api3.results.length + " " + j + " " + index)
+                                                            let rating = api5.result.rating;
+
+                                                            if (api5.result.opening_hours != undefined) {
+                                                                let StartTime = await api5.result.opening_hours.periods[0].open.time;
+                                                                let Starthours = (StartTime.toString()).substring(0, 2);
+                                                                let Startminutes = (StartTime.toString()).substring(2, 4);
+                                                                let Starthours_seconds = parseInt(Starthours) * 60 * 60;
+                                                                let Startminutes_seconds = parseInt(Startminutes) * 60;
+                                                                let OpenTime_place = Starthours_seconds + Startminutes_seconds;
+
+                                                                let CloseTime = await api5.result.opening_hours.periods[0].open.time;
+                                                                let Closehours = (CloseTime.toString()).substring(0, 2);
+                                                                let Closeminutes = (CloseTime.toString()).substring(2, 4);
+                                                                let Closehours_seconds = parseInt(Closehours) * 60 * 60;
+                                                                let Closeminutes_seconds = parseInt(Closeminutes) * 60;
+                                                                let CloseTime_place = Closehours_seconds + Closeminutes_seconds;
+
+                                                                // if (CloseTime_place < 43200) {
+                                                                //     CloseTime_place = CloseTime_place + 86400;
+                                                                // }
+
+                                                                if (TimeToReachSpot >= OpenTime_place) {
+                                                                    
+                                                                    if ("ChIJq6rO6fw4sz4RS1G5MpYOvuw" != element.place_id) {
+                                                                        
+                                                                        if (rating > max1) {
+                                                                            j++;
+                                                                            max1 = rating
+                                                                            PlaceID = element.place_id + "," + TravellingTime;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            j++
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        j++;
+                                                                    }
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    j++
+                                                                }
+                                                               
+                                                                if (api3.results.length == j+1 || api3.results.length == j+2 || api3.results.length == j) {
+                                                                    // console.warn(index + " " + element.name + "  " + j);
+                                                                    resolve(PlaceID)
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                j++;
+                                                            }
+                                                        }
+
+                                                        else {
+                                                            j++;
+                                                            // console.warn(api3.results.length + " " + j + " " + index)
+                                                            if (api3.results.length == j+1 || api3.results.length == j+2 || api3.results.length == j) {
+                                                                // console.warn(index + " " + element.name + "  " + j);
+                                                                resolve(PlaceID)
+                                                            }
+                                                        }
+
+
+                                                    })
+                                                    .catch(async api5error => {
+                                                        console.warn("API5 " + api5error)
+                                                    });
+
+                                            })
+                                            .catch(async api5error => {
+                                                console.warn("API4 " + api5error)
+
+                                            });
+
                                     })
                                 })
                                 .catch(async api5error => {
