@@ -3,10 +3,8 @@ import { ImageBackground, Image, StyleSheet, StatusBar, Dimensions, Platform } f
 import { Block, Text, theme } from 'galio-framework';
 import { Button } from 'react-native-elements';
 const { height, width } = Dimensions.get('screen');
-import Spinner from 'react-native-loading-spinner-overlay';
 import { AsyncStorage } from 'react-native';
-// import { toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import {
   View,
@@ -23,20 +21,18 @@ export default class Onboarding extends React.Component {
     spinner: false,
   };
 
-
-
   async onLogin() {
     const { email, password } = this.state;
+
+    this.setState({
+      spinner: true
+    });
 
     AsyncStorage.setItem('ip', '192.168.0.111')
 
     if (email != "") {
+      
       if (password != "") {
-        // this.setState({
-        //   spinner: true
-        // });
-
-        alert(email+ password)
 
         await fetch('http://192.168.0.111:3006/userlogin?Email=' + email + '&Password=' + password + ' ')
           .then(res => res.json())
@@ -45,18 +41,14 @@ export default class Onboarding extends React.Component {
             if (users == 0) {
               alert("invalid credentials");
 
-              
             }
             else {
-              alert("success");
               AsyncStorage.setItem('Email', users[0].Email.toString());
               this.props.navigation.navigate('Home');
             }
           })
 
-        // this.setState({
-        //   spinner: false
-        // });
+
       }
       else {
         alert("Please enter password.");
@@ -66,6 +58,9 @@ export default class Onboarding extends React.Component {
       alert("Please enter email.");
     }
 
+    this.setState({
+      spinner: false
+    });
 
 
   }
@@ -78,6 +73,11 @@ export default class Onboarding extends React.Component {
 
     return (
       <Block style={{ flex: 1 }}>
+        <Spinner
+          visible={this.state.spinner}
+          textContent={'Verifying Credentials'}
+          textStyle={styles.spinnerTextStyle}
+        />
         <ImageBackground
           source={require('../assets/hello.jpg')}
           style={styles.background}
@@ -136,6 +136,9 @@ export default class Onboarding extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  spinnerTextStyle:{
+    color: 'white'
+  },
   underline: {
     textDecorationLine: 'underline',
     textDecorationStyle: 'double'
