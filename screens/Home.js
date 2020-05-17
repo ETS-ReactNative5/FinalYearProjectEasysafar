@@ -284,17 +284,11 @@ class Home extends React.Component {
 
         <Block style={styles.buttonContainer}>
           <Button
-            icon={
-              <Icon
-                name="car"
-                size={15}
-                color="white"
-              />
-            }
+            
             type="solid"
             iconLeft
             textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
-            title="  START NEW TRIP "
+            title=" CREATE TRIP "
             onPress={() =>
               this.props.navigation.navigate("createtrip")
             }
