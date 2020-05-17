@@ -6,6 +6,7 @@ import {
     Dimensions,
     TouchableWithoutFeedback,
     Keyboard,
+    AsyncStorage,
 } from 'react-native';
 import { Block, Checkbox, Text, Button as GaButton, theme } from 'galio-framework';
 
@@ -14,6 +15,7 @@ import { Images, nowTheme } from '../constants';
 
 const { width, height } = Dimensions.get('screen');
 
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 
@@ -26,29 +28,64 @@ class Register extends React.Component {
         super(props);
         //Initial State
         this.state = {
-           email:"",
-           password:"",
-           name:"",
-           phone:"",
-            
+            email: "",
+            password: "",
+            name: "",
+            phone: "",
+            spinner: false,
         };
     }
 
 
     async onSignup() {
+        this.setState({
+            spinner: true
+          });
+
+        let ip = await AsyncStorage.getItem('ip');
+
         const { email, password, name, phone } = this.state;
-        await fetch('http://192.168.43.42:3006/useradd?Name='+name+'&Email='+email+'&Password='+password+'&phone='+phone+'')
-        .then(users => {
-            
-            alert("inserted");
-            this.props.navigation.navigate('Onboarding') 
-        })
-      
+        if (email != "") {
+            if (password != "") {
+                if (name != "") {
+                    if (phone != "") {
+                        await fetch('http://' + ip + ':3006/useradd?Name=' + name + '&Email=' + email + '&Password=' + password + '&phone=' + phone + '')
+                            .then(users => {
+
+                                alert("inserted");
+                                this.props.navigation.navigate('Onboarding')
+                            })
+                    }
+                    else {
+                        alert("Please enter phone number.");
+                    }
+                }
+                else {
+                    alert("Please enter name.");
+                }
+            }
+            else {
+                alert("Please enter password.");
+            }
+        }
+        else {
+            alert("Please enter email.");
+        }
+        this.setState({
+            spinner: false
+          });
+
     }
+
     render() {
         return (
             <DismissKeyboard>
                 <Block flex middle>
+                    <Spinner
+                        visible={this.state.spinner}
+                        textContent={'Verifying Credentials'}
+                        textStyle={styles.spinnerTextStyle}
+                    />
                     <ImageBackground
                         source={require('../assets/hello.jpg')}
                         style={styles.imageBackgroundContainer}
@@ -64,12 +101,12 @@ class Register extends React.Component {
                                                 <Block style={{ marginTop: 20 }}>
                                                     <Block width={width * 0.8} style={{ marginBottom: 5 }}>
                                                         <Input
-                                                            placeholder="Username"
+                                                            placeholder="Name"
                                                             style={styles.inputs}
                                                             iconContent={
                                                                 <Icon
                                                                     size={16}
-                                                                    color="#ADB5BD"    
+                                                                    color="#ADB5BD"
                                                                     name="profile-circle"
                                                                     family="NowExtra"
                                                                     style={styles.inputIcons}
@@ -85,7 +122,7 @@ class Register extends React.Component {
                                                             iconContent={
                                                                 <Icon
                                                                     size={16}
-                                                                    color="#ADB5BD"    
+                                                                    color="#ADB5BD"
                                                                     name="mobile2x"
                                                                     family="NowExtra"
                                                                     style={styles.inputIcons}
@@ -98,7 +135,7 @@ class Register extends React.Component {
                                                         <Input
                                                             placeholder="Email"
                                                             keyboardType="email-address"
-                                                            
+
                                                             style={styles.inputs}
                                                             iconContent={
                                                                 <Icon
@@ -116,7 +153,7 @@ class Register extends React.Component {
                                                         <Input
                                                             placeholder="Password"
                                                             secureTextEntry={true}
-                                                            
+
                                                             style={styles.inputs}
                                                             iconContent={
                                                                 <Icon
@@ -130,7 +167,7 @@ class Register extends React.Component {
                                                             onChangeText={(password) => this.setState({ password })}
                                                         />
                                                     </Block>
-                                                  
+
                                                 </Block>
                                                 <Block center>
                                                     <Button color="primary" round style={styles.createButton} onPress={this.onSignup.bind(this)}>
@@ -140,8 +177,8 @@ class Register extends React.Component {
                                                             color={nowTheme.COLORS.WHITE}
 
                                                         >
-                                                            CREATE   
-                                                            </Text> 
+                                                            CREATE
+                                                            </Text>
                                                     </Button>
                                                 </Block>
                                             </Block>
