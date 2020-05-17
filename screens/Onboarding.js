@@ -26,32 +26,47 @@ export default class Onboarding extends React.Component {
 
 
   async onLogin() {
-    this.setState({
-      spinner: true
-    });
-
     const { email, password } = this.state;
 
-    // await fetch('http://192.168.0.112:3006/userlogin?Email='+email+'&Password='+password+'')
-    // .then(res => res.json())
-    //   .then(users => {
+    AsyncStorage.setItem('ip', '192.168.0.111')
 
-    //       if(users==1)
-    // {
-    // toast("Wow so easy !");
-    // alert("success");
-    this.setState({
-      spinner: false
-    });
-    AsyncStorage.setItem('Email', 'ahsanshah2398@gmail.com');
-    this.props.navigation.navigate('Home');
-    //     }
-    //     else
-    //     {
-    //       alert("invalid credentials");
-    //     }           
+    if (email != "") {
+      if (password != "") {
+        // this.setState({
+        //   spinner: true
+        // });
 
-    // })
+        alert(email+ password)
+
+        await fetch('http://192.168.0.111:3006/userlogin?Email=' + email + '&Password=' + password + ' ')
+          .then(res => res.json())
+          .then(users => {
+
+            if (users == 0) {
+              alert("invalid credentials");
+
+              
+            }
+            else {
+              alert("success");
+              AsyncStorage.setItem('Email', users[0].Email.toString());
+              this.props.navigation.navigate('Home');
+            }
+          })
+
+        // this.setState({
+        //   spinner: false
+        // });
+      }
+      else {
+        alert("Please enter password.");
+      }
+    }
+    else {
+      alert("Please enter email.");
+    }
+
+
 
   }
 
