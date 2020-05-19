@@ -81,7 +81,7 @@ class Home extends React.Component {
 
     return (
 
-      <Block style={styles.home}>
+      <Block style={{flex:1}}>
 
         <Block style={{ flexDirection: 'row', paddingTop: 0 }}>
 
@@ -149,7 +149,7 @@ class Home extends React.Component {
 
         <MapView />
 
-        <Block style={{ flexDirection: 'column', width: width }}>
+        {/* <Block style={{ flexDirection: 'column', width: width }}> */}
 
           <Block style={{ flexDirection: 'row', width: width }}>
             <TouchableOpacity
@@ -264,7 +264,7 @@ class Home extends React.Component {
             </TouchableOpacity>
           </Block>
 
-        </Block>
+        {/* </Block> */}
 
         <Block style={styles.buttonContainer}>
           <Button

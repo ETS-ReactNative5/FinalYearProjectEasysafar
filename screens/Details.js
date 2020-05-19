@@ -69,6 +69,8 @@ class Components extends Component {
       review3time: "",
       review4time: "",
 
+      all_reviews:[],
+
       heartcolor: "white"
     };
   }
@@ -247,6 +249,7 @@ class Components extends Component {
       .then(res => res.json())
 
       .then(res => {
+        
         this.setState({ userreview: res[0].Review });
         this.setState({ userrating: res[0].Rating });
 
@@ -272,7 +275,7 @@ class Components extends Component {
     await fetch('http://'+ip+':3006/saveplace?PlaceName=' + name + '&Email=' + email + '&PlaceID=' + placeid + '&PlacePhoto=' + image1url + ' ')
       .then(users => {
 
-        alert("inserted");
+        alert("Place Saved!");
         this.displayData();
         this.setState({
           spinner: false,

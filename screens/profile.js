@@ -333,7 +333,7 @@ class Profile extends React.Component {
 
           {this.state.array.map((element, index) => (
             <TouchableOpacity onPress={() => {
-              alert(element.id)
+             
               AsyncStorage.setItem('SavedTripID', (element.id).toString());
               this.props.navigation.navigate("SavedTripMapPage");
             }}>

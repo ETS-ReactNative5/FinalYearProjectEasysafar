@@ -60,8 +60,8 @@ class createtrip extends Component {
 
             flag: 0,
             max: -100,
-            departurename:"",
-            destinationname:""
+            departurename: "",
+            destinationname: ""
 
 
 
@@ -93,7 +93,7 @@ class createtrip extends Component {
         await fetch('http://' + ip + ':3006/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + ' &Waypoints=' + waypoints + ' &DepartureName=' + this.state.departurename + ' &DestinationName=' + this.state.destinationname + ' &TripStartDate=' + TripStartDate + ' &StartTime=' + StartTime + ' &LunchTime=' + LunchTime + '&DinnerTime=' + DinnerTime + ' ')
             .then(users => {
 
-                alert("inserted");
+                alert("Trip Saved!");
 
                 this.setState({
                     spinner: false
@@ -105,7 +105,7 @@ class createtrip extends Component {
                 });
             });
 
-     
+
     }
 
     async function() {
@@ -136,16 +136,26 @@ class createtrip extends Component {
                 let startingLatitude = starting.result.geometry.location.lat;
                 let startingLongitude = starting.result.geometry.location.lng;
 
+                let timee = StartTripTime_seconds;
+
+                let Starthour = Math.floor(timee / 3600);
+                timee %= 3600;
+                let Startminutes = Math.floor(timee / 60);
+
                 const startingObj = {};
 
                 startingObj.place_id = starting.result.place_id;
+
+                startingObj.ReachTime = "-";
+
+                startingObj.TimeSpent = Starthour + ":" + Startminutes
 
                 if (starting.result.photos != undefined)
                     startingObj.image = starting.result.photos[0].photo_reference;
 
 
                 startingObj.name = starting.result.name;
-                this.setState({departurename: starting.result.name})
+                this.setState({ departurename: starting.result.name })
 
                 startingObj.rating = starting.result.rating;
 
@@ -176,7 +186,7 @@ class createtrip extends Component {
                             destinationObj.image = destination.result.photos[0].photo_reference;
 
                         destinationObj.name = destination.result.name;
-                        this.setState({destinationname:destination.result.name})
+                        this.setState({ destinationname: destination.result.name })
 
                         destinationObj.rating = destination.result.rating;
 
@@ -205,23 +215,23 @@ class createtrip extends Component {
                         if (radius > 50000) {
                             radius = 50000
                         }
-                        // var radius = 50000;
-
                         var count = 0;
 
-                        var check = 0;
+                        var flag1=0;
+
+                        let Type = TypesSelectedArray[0]
 
                         while (SpotToDestination > 1000) {
                             // while (i < 2) {
+                            
 
                             for (var k = 0; k < TypesSelectedArray.length - 1; k++) {
 
                                 i = i + 1;
 
-                                var place1 = await this.PickSpot(place, radius, TypesSelectedArray[k]);
+                                // console.warn(flag1)
 
-
-                                check++;
+                                var place1 = await this.PickSpot(place, radius, Type);
 
                                 place1 = place1.split(",");
 
@@ -229,13 +239,11 @@ class createtrip extends Component {
 
                                     count = 0;
 
-                                     
-
+                                    let Reachingtime = StartTripTime_seconds + parseInt(place1[1]) + 600;
                                     let Endtime = parseInt(StartTripTime_seconds) + parseInt(place1[1]) + 3000;
+                                    let temp = Endtime;
 
                                     StartTripTime_seconds = Reachingtime + (50 * 60);
-
-                                    
 
                                     await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1[0] + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                                         .then(res => res.json())
@@ -249,7 +257,7 @@ class createtrip extends Component {
                                             const d = { latitude: endingLatitude, longitude: endingLongitude }
 
                                             SpotToDestination = haversine(c, d);
-                                            let Reachingtime = StartTripTime_seconds
+
                                             let Reachinghour = Math.floor(Reachingtime / 3600);
                                             Reachingtime %= 3600;
                                             let Reachingminutes = Math.floor(Reachingtime / 60);
@@ -258,7 +266,11 @@ class createtrip extends Component {
                                             Endtime %= 3600;
                                             let Endminutes = Math.floor(Endtime / 60);
 
-                                            // console.warn(SpotToDestination + " " + intermediate.result.name + " " + Reachinghour + ":" + Reachingminutes)
+                                            let LunchTime = await AsyncStorage.getItem('LunchTime');
+                                            let LunchTIme_Seconds = this.TimeConversion(LunchTime);
+
+                                            let DinnerTime = await AsyncStorage.getItem('DinnerTime');
+                                            let DinnerTime_Seconds = this.TimeConversion(DinnerTime);
 
                                             const intermediateObj = {};
 
@@ -291,12 +303,27 @@ class createtrip extends Component {
                                             let string = "place_id:" + place1[0] + "|";
                                             finalstring = finalstring + string;
 
+                                            if (temp - 3000 < LunchTIme_Seconds && LunchTIme_Seconds < temp + 3000 || temp - 3000 < DinnerTime_Seconds && DinnerTime_Seconds < temp + 3000 ) {
+                                                if(flag1==0)
+                                                {
+                                                    // console.warn(DinnerTime_Seconds+ " " + temp + " " + "a")
+                                                    Type = 'restaurant';
+                                                    flag1=1;
+                                                }                                                   
+                                                else
+                                                    Type = TypesSelectedArray[k]
+                                            }
+                                            else
+                                            {
+                                                flag1=0;
+                                                Type = TypesSelectedArray[k]
+                                            }
                                             place = place1[0];
-                                            // i = i + 1;
+
 
                                         })
                                         .catch(async api5error => {
-                                            console.warn("API ERROR "+api5error)
+                                            console.warn("API ERROR " + api5error)
                                             this.setState({
                                                 spinner: false
                                             });
@@ -304,6 +331,8 @@ class createtrip extends Component {
 
                                 }
                                 else {
+
+                                    Type = TypesSelectedArray[k]
 
                                     count++;
 
@@ -328,7 +357,35 @@ class createtrip extends Component {
 
                         }
 
-                        this.state.places_nearby.push(destinationObj);
+                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + place + `&destinations=place_id:` + destinationPlaceID1 + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                            .then(res => res.json())
+
+                            .then(api4 => {
+
+                                //Time taken to reach from starting to spot 
+                                let TravellingTime = api4.rows[0].elements[0].duration.value;
+
+                                //TOTAL WHEN WE WILL REACH FROM STARTING TO SPOT
+                                let TimeToReachSpot = StartTripTime_seconds + TravellingTime;
+
+                                let hour = Math.floor(TimeToReachSpot / 3600);
+                                TimeToReachSpot %= 3600;
+                                let minutes = Math.floor(TimeToReachSpot / 60);
+
+                                // console.warn(hour+":"+minutes)
+
+                                destinationObj.ReachTime = hour + ":" + minutes
+
+                                destinationObj.TimeSpent = "-"
+
+                                this.state.places_nearby.push(destinationObj);
+                            })
+                            .catch(async api5error => {
+                                console.warn("API ERROR " + api5error)
+                                this.setState({
+                                    spinner: false
+                                });
+                            });
 
                         this.setState({
                             spinner: false
@@ -337,14 +394,14 @@ class createtrip extends Component {
                         this.getDirections();
                     })
                     .catch(async api5error => {
-                        console.warn("API ERROR "+api5error)
+                        console.warn("API ERROR " + api5error)
                         this.setState({
                             spinner: false
                         });
                     });
             })
             .catch(async api5error => {
-                console.warn("API ERROR "+api5error)
+                console.warn("API ERROR " + api5error)
                 this.setState({
                     spinner: false
                 });
@@ -420,9 +477,6 @@ class createtrip extends Component {
                                     var j = 0;
 
                                     api3.results.map((element, index) => {
-
-
-
 
                                         const c = { latitude: element.geometry.location.lat, longitude: element.geometry.location.lng }
                                         const d = { latitude: endingLatitude, longitude: endingLongitude }

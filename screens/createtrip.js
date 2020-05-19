@@ -55,8 +55,8 @@ class createtrip extends React.Component {
       visible: false,
       navigation: 123,
       date: new Date().toJSON().slice(0,10),
-      lunchTime: "03:00",
-      dinnerTime: "09:00",
+      lunchTime: "15:00",
+      dinnerTime: "21:00",
       startTime: "12:00",
       departurePlaceID: "",
       destinationPlaceID: "",
@@ -192,7 +192,7 @@ class createtrip extends React.Component {
                   },
                 }}
                 onDateChange={startTime => {
-                  alert(startTime)
+                
                   this.setState({ startTime: startTime });
                 }}
               />
@@ -229,7 +229,7 @@ class createtrip extends React.Component {
                   },
                 }}
                 onDateChange={date => {
-                  alert(date)
+                  
                   this.setState({ date: date });
                 }}
               />
@@ -322,7 +322,7 @@ class createtrip extends React.Component {
                   },
                 }}
                 onDateChange={lunchTime => {
-                  alert(lunchTime)
+                
                   this.setState({ lunchTime: lunchTime });
                 }}
               />
@@ -355,7 +355,7 @@ class createtrip extends React.Component {
                   },
                 }}
                 onDateChange={dinnerTime => {
-                  alert(dinnerTime)
+                 
                   this.setState({ dinnerTime: dinnerTime });
                 }}
               />

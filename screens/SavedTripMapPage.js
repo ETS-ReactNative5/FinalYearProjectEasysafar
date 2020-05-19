@@ -116,9 +116,9 @@ class SavedTripMapPage extends Component {
     }
 
     async places() {
-        // this.setState({
-        //     spinner: true
-        // });
+        this.setState({
+            spinner: true
+        });
 
         var DepartureID = this.state.DepartureID;
         var DestinationID = this.state.DestinationID;
@@ -143,6 +143,18 @@ class SavedTripMapPage extends Component {
 
                 if (starting.result.photos != undefined)
                     startingObj.image = starting.result.photos[0].photo_reference;
+
+                let timee = StartingTime_Seconds;
+
+                let Starthour = Math.floor(timee / 3600);
+                timee %= 3600;
+                let Startminutes = Math.floor(timee / 60);
+
+                // console.warn(Starthour+":"+Startminutes)
+
+                startingObj.ReachTime = "-";
+
+                startingObj.EndTime = Starthour + ":" + Startminutes
 
                 startingObj.name = starting.result.name;
 
@@ -169,6 +181,9 @@ class SavedTripMapPage extends Component {
         var waypointsArray1 = waypointsArray.toString().split("|");
 
         let StartingTime_Seconds = this.TimeConversion(StartTime);
+        //console.warn(waypointsArray1.length - 2)
+        var lastplace = waypointsArray1[waypointsArray1.length - 2]
+
 
         for (var i = 0; i < waypointsArray1.length; i++) {
 
@@ -186,9 +201,7 @@ class SavedTripMapPage extends Component {
                                 //Time taken to reach from starting to spot 
                                 let TravellingTime = api4.rows[0].elements[0].duration.value;
 
-                                let TimeToReachSpot = StartingTime_Seconds + TravellingTime;
-
-                                //console.warn(TimeToReachSpot)
+                                let TimeToReachSpot = StartingTime_Seconds + TravellingTime + 600;
 
                                 let time = TimeToReachSpot
 
@@ -196,18 +209,16 @@ class SavedTripMapPage extends Component {
                                 time %= 3600;
                                 let Reachingminutes = Math.floor(time / 60);
 
-                                console.warn("REACH TIME: " + Reachinghour + ":" + Reachingminutes)
+                                // console.warn("REACH TIME: " + Reachinghour + ":" + Reachingminutes)
 
                                 let Endtime = TimeToReachSpot + 3000;
 
-                                
+
                                 let Endhour = Math.floor(Endtime / 3600);
                                 Endtime %= 3600;
                                 let Endminutes = Math.floor(Endtime / 60);
 
-                                console.warn("END TIME: " + Endhour+":"+Endminutes)
 
-                                //Longitute and Latitude of destnation 
                                 let endingLatitude = intermediate.result.geometry.location.lat;
                                 let endingLongitude = intermediate.result.geometry.location.lng;
 
@@ -220,9 +231,9 @@ class SavedTripMapPage extends Component {
 
                                 intermediateObj.rating = intermediate.result.rating;
 
-                                intermediateObj.ReachTime = Reachinghour+":"+Reachingminutes
-                                
-                                intermediateObj.EndTime = Endhour+":"+Endminutes
+                                intermediateObj.ReachTime = Reachinghour + ":" + Reachingminutes
+
+                                intermediateObj.EndTime = Endhour + ":" + Endminutes
 
                                 intermediateObj.name = intermediate.result.name;
 
@@ -233,13 +244,13 @@ class SavedTripMapPage extends Component {
 
                                 this.state.places_nearby.push(intermediateObj);
 
-                                StartingTime_Seconds = TimeToReachSpot;
+                                StartingTime_Seconds = TimeToReachSpot + 3000;
 
 
 
                             })
                             .catch(async api5error => {
-                                console.warn("Api 5 "+api5error)
+                                console.warn("Api 5 " + api5error)
                                 this.setState({
                                     spinner: false
                                 });
@@ -260,27 +271,54 @@ class SavedTripMapPage extends Component {
 
             .then(async destination => {
 
-                console.warn(destination)
-                //Longitute and Latitude of destnation 
-                let endingLatitude = destination.result.geometry.location.lat;
-                let endingLongitude = destination.result.geometry.location.lng;
+                fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + lastplace.replace(",", "") + `&destinations=place_id:` + DestinationID.replace(" ", "") + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                    .then(res => res.json())
 
-                const destinationObj = {};
+                    .then(api4 => {
 
-                destinationObj.place_id = destination.result.place_id;
+                        //Time taken to reach from starting to spot 
+                        let TravellingTime = api4.rows[0].elements[0].duration.value;
+                        //console.warn(TravellingTime)
 
-                destinationObj.image = destination.result.photos[0].photo_reference;
+                        let TimeToReachSpot = StartingTime_Seconds + TravellingTime + 600;
 
-                destinationObj.name = destination.result.name;
+                        let hour = Math.floor(TimeToReachSpot / 3600);
+                        TimeToReachSpot %= 3600;
+                        let minutes = Math.floor(TimeToReachSpot / 60);
 
-                destinationObj.rating = destination.result.rating;
+                        //Longitute and Latitude of destnation 
+                        let endingLatitude = destination.result.geometry.location.lat;
+                        let endingLongitude = destination.result.geometry.location.lng;
 
-                destinationObj.marker = {
-                    latitude: endingLatitude,
-                    longitude: endingLongitude
-                };
+                        const destinationObj = {};
 
-                this.state.places_nearby.push(destinationObj);
+                        destinationObj.place_id = destination.result.place_id;
+
+                        destinationObj.image = destination.result.photos[0].photo_reference;
+
+                        destinationObj.name = destination.result.name;
+
+                        destinationObj.rating = destination.result.rating;
+
+                        destinationObj.ReachTime = hour + ":" + minutes;
+
+                        destinationObj.EndTime = "-";
+
+                        destinationObj.marker = {
+                            latitude: endingLatitude,
+                            longitude: endingLongitude
+                        };
+
+                        
+
+                        this.state.places_nearby.push(destinationObj);
+                    })
+                    .catch(async api5error => {
+                        this.setState({
+                            spinner: false
+                        });
+                    });
+
 
             })
             .catch(async api5error => {
