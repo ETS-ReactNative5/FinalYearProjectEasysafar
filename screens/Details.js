@@ -6,6 +6,7 @@ import { Animated, View, StyleSheet, Image, TouchableOpacity, Dimensions, Scroll
 import { AsyncStorage } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 
+import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 //Components
 
 const FIXED_BAR_WIDTH = 280
@@ -67,23 +68,47 @@ class Components extends Component {
       review2time: "",
       review3time: "",
       review4time: "",
+
+      heartcolor: "white"
     };
   }
 
-  // async componentWillUnmount(){
-  //   await this.getReview()  
-  // }
-
   componentDidMount() {
-    setTimeout(() => {
-      this.setState({
-        spinner: false
-      });
-    }, 7000);
-
     this.displayData()
-    this.getReview()  
-   
+    this.getReview()
+    
+  }
+
+  async checksave(){
+    this.setState({
+      spinner: true
+    });
+    let ip = await AsyncStorage.getItem('ip');
+    let placeid = await AsyncStorage.getItem('placeid');
+    let email = await AsyncStorage.getItem('Email');
+
+    await fetch('http://'+ip+':3006/checksaveplace?Email=' + email + '&PlaceID=' + placeid + ' ')
+      .then(res => res.json())
+
+      .then(res => {
+        if(res==1){
+          this.setState({heartcolor:"red"})
+          this.setState({
+            spinner: false
+          });
+        }
+        else{
+          this.setState({
+            spinner: false
+          });
+        }
+
+      })
+      .catch(res => {
+        this.setState({
+          spinner: false
+        });
+      });
   }
 
   displayData = async () => {
@@ -92,11 +117,12 @@ class Components extends Component {
 
       this.setState({ placeid: placeid });
       this.getPlaces(placeid);
-      
+      this.checksave()
+
 
     }
     catch (error) {
-      alert(error)
+      // alert(error)
     }
   }
 
@@ -108,6 +134,10 @@ class Components extends Component {
   }
 
   async getPlaces(place) {
+
+    this.setState({
+      spinner: true
+    });
 
     // alert(placeid);
     const url = this.getPlacesUrl(place, GOOGLE_API_KEY);
@@ -194,31 +224,32 @@ class Components extends Component {
         this.setState({ review4text: res.result.reviews[3].text });
         this.setState({ review4time: res.result.reviews[3].relative_time_description });
 
-
+        this.setState({
+          spinner: false
+        });
       })
       .catch(res => {
-
+        // alert(res)
+        this.setState({
+          spinner: false
+        });
       });
 
 
   }
 
   async getReview() {
-
-    // alert("placeid");
+    let ip = await AsyncStorage.getItem('ip');
     let placeid = await AsyncStorage.getItem('placeid');
     let email = await AsyncStorage.getItem('Email');
 
-    // const url = this.getPlacesUrl(place, GOOGLE_API_KEY);
-    await fetch('http://192.168.0.107:3006/getreview?Email='+email+'&PlaceID=' + placeid + ' ')
+    await fetch('http://'+ip+':3006/getreview?Email=' + email + '&PlaceID=' + placeid + ' ')
       .then(res => res.json())
 
       .then(res => {
-        // alert(res[0].Review);
-        // console.log(res[0].Review)
         this.setState({ userreview: res[0].Review });
         this.setState({ userrating: res[0].Rating });
-        
+
 
       })
       .catch(res => {
@@ -228,11 +259,44 @@ class Components extends Component {
 
   }
 
+  async saveplace(name, image1url) {
+
+    let placeid = await AsyncStorage.getItem('placeid');
+    let email = await AsyncStorage.getItem('Email');
+    let ip = await AsyncStorage.getItem('ip');
+
+    this.setState({
+      spinner: true
+    });
+
+    await fetch('http://'+ip+':3006/saveplace?PlaceName=' + name + '&Email=' + email + '&PlaceID=' + placeid + '&PlacePhoto=' + image1url + ' ')
+      .then(users => {
+
+        alert("inserted");
+        this.displayData();
+        this.setState({
+          spinner: false,
+          heartcolor: "red"
+        });
+      })
+      .catch(res => {
+        // alert(res)
+        this.setState({
+          spinner: false
+        });
+      });
+
+
+  }
+
   render() {
+
     const { name, rating, type, address, placeid, phone, image1url, image2url, image3url, image4url, image5url, website, price_level,
       opening_hours, open_now, review1author, review1text, review1time, review2author, review2text, review2time, review3author, review3text,
       review3time, review4author, review4text, review4time, userreview, userrating } = this.state;
+
     let imageArray = []
+
     let barArray = []
 
     images.forEach((image, i) => {
@@ -353,13 +417,28 @@ class Components extends Component {
               <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>{name}</Text>
-                  <TouchableOpacity
+                  <Block style={{ flexDirection: 'column' }}>
+                    <TouchableOpacity
 
-                    onPress={() => {
-                      AsyncStorage.setItem('PlaceName', name);
-                      this.props.navigation.navigate("addreview");
-                    }}>
-                    <Text style={styles.subTitle}>Add Review</Text></TouchableOpacity>
+                      onPress={() => {
+                        AsyncStorage.setItem('PlaceName', name);
+                        this.props.navigation.navigate("addreview");
+                      }}>
+                      <Text style={styles.subTitle}>Add Review</Text></TouchableOpacity>
+
+                    {/* <Block style={{ marginLeft: width * 0.8 }}> */}
+
+                    <TouchableOpacity
+
+                      onPress={() => {
+                        this.saveplace(name, image1url);
+                      }}
+                    >
+                      <FontAwesome name="heart" size={32} color={this.state.heartcolor} />
+
+                    </TouchableOpacity>
+                    {/* </Block> */}
+                  </Block>
 
                 </View>
 
@@ -371,6 +450,10 @@ class Components extends Component {
                   <Text style={styles.subTitle}> Open Now: {open_now} </Text>
                 </View>
               </TouchableOpacity>
+
+
+
+
 
               <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
                 <View style={styles.cardHeader}>
@@ -441,10 +524,10 @@ class Components extends Component {
                     </View>
                   </TouchableOpacity>
 
-                    
+
                   <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
-                    <View style={styles.cardFooter}> 
-                    <Text style={styles.Title}> Your Review </Text>
+                    <View style={styles.cardFooter}>
+                      <Text style={styles.Title}> Your Review </Text>
                       {/* <Text style={styles.subTitleReview}> Author Name: {review4author} </Text> */}
                       <Text style={styles.subTitleReview}> Review: {userreview} </Text>
                       <Text style={styles.subTitleReview}> Rating: {userrating} </Text>

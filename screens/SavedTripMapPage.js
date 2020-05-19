@@ -15,21 +15,19 @@ import {
 
 import { AsyncStorage } from 'react-native';
 
-import Polyline from '@mapbox/polyline';
+import { Block, theme } from 'galio-framework';
 
-import haversine from 'haversine-distance'
+import Polyline from '@mapbox/polyline';
 
 var distance = require('euclidean-distance')
 
 import Spinner from 'react-native-loading-spinner-overlay';
 
-import { Button } from 'react-native-elements';
-
 const { width, height } = Dimensions.get("window");
 
-const CARD_HEIGHT = height / 4;
+const CARD_HEIGHT = height / 3;
 
-const CARD_WIDTH = CARD_HEIGHT - 50;
+const CARD_WIDTH = CARD_HEIGHT - 100;
 
 class SavedTripMapPage extends Component {
 
@@ -65,8 +63,11 @@ class SavedTripMapPage extends Component {
 
             DepartureID: "",
             DestinationID: "",
-            Waypoints: ""
-
+            Waypoints: "",
+            StartTime: "",
+            StartDate: "",
+            LunchTime: "",
+            DinnerTime: ""
 
 
         };
@@ -74,43 +75,64 @@ class SavedTripMapPage extends Component {
 
     componentDidMount() {
 
-
         this.getDetails();
     }
 
     async getDetails() {
         let SavedTripID = await AsyncStorage.getItem('SavedTripID');
+        let ip = await AsyncStorage.getItem('ip');
 
-        await fetch('http://192.168.0.100:3006/getsavedtripsbyid?id=' + SavedTripID + ' ')
+        // console.warn(SavedTripID + " " + ip)
+
+        await fetch('http://' + ip + ':3006/getsavedtripsbyid?id=' + SavedTripID + ' ')
             .then(res => res.json())
 
             .then(res => {
-                //console.warn( res[0].DepartureID);
+
                 this.setState({
                     DepartureID: res[0].DepartureID,
                     DestinationID: res[0].DestinationID,
-                    Waypoints: res[0].Waypoints
+                    Waypoints: res[0].Waypoints,
+                    StartTime: res[0].StartTime,
+                    StartDate: res[0].StartDate,
+                    LunchTime: res[0].LunchTime,
+                    DinnerTime: res[0].DinnerTime,
+
                 })
 
             });
 
-        //this.getDirections();
         this.places();
     }
 
+    TimeConversion(StartTime) {
+
+
+        let hours = (StartTime.toString()).substring(0, 2);
+        let minutes = (StartTime.toString()).substring(2, 4);
+        let hours_seconds = parseInt(hours) * 60 * 60;
+        let minutes_seconds = parseInt(minutes) * 60;
+        return (hours_seconds + minutes_seconds);
+    }
+
     async places() {
-        this.setState({
-            spinner: true
-        });
+        // this.setState({
+        //     spinner: true
+        // });
 
         var DepartureID = this.state.DepartureID;
         var DestinationID = this.state.DestinationID;
         var Waypoints = this.state.Waypoints;
+        var StartTime = this.state.StartTime;
 
-        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DepartureID + `&fields=geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DepartureID + `&fields=rating,geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
             .then(res => res.json())
 
             .then(async  starting => {
+
+                let StartingTime_Seconds = this.TimeConversion(StartTime);
+                // console.warn(StartingTime_Seconds)
+                //console.warn(StartingTime_Seconds)
 
                 let startingLatitude = starting.result.geometry.location.lat;
                 let startingLongitude = starting.result.geometry.location.lng;
@@ -119,11 +141,14 @@ class SavedTripMapPage extends Component {
 
                 startingObj.place_id = starting.result.place_id;
 
-                startingObj.image = starting.result.photos[0].photo_reference;
+                if (starting.result.photos != undefined)
+                    startingObj.image = starting.result.photos[0].photo_reference;
 
                 startingObj.name = starting.result.name;
 
                 startingObj.StartTime = await AsyncStorage.getItem('TripStartTime');
+
+                startingObj.rating = starting.result.rating;
 
                 startingObj.marker = {
                     latitude: startingLatitude,
@@ -131,54 +156,111 @@ class SavedTripMapPage extends Component {
                 };
 
                 this.state.places_nearby.push(startingObj);
+            })
+            .catch(async api5error => {
+                this.setState({
+                    spinner: false
+                });
             });
 
-        
+
 
         var waypointsArray = Waypoints.split("place_id:");
         var waypointsArray1 = waypointsArray.toString().split("|");
-        // var waypointsArray = await waypointsArray.toString().split("|");
 
-        // var waypointsArray = await waypointsArray.toString().split(",");
+        let StartingTime_Seconds = this.TimeConversion(StartTime);
 
         for (var i = 0; i < waypointsArray1.length; i++) {
-            console.warn(i);
-            if(waypointsArray1[i].replace(",","")!="")
-            {
-                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=`+waypointsArray1[i].replace(",","")+`&fields=geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
-                .then(res => res.json())
 
-                .then(async intermediate => {
-                    console.warn(waypointsArray[i])
-                    //Longitute and Latitude of destnation 
-                    let endingLatitude = intermediate.result.geometry.location.lat;
-                    let endingLongitude = intermediate.result.geometry.location.lng;
+            if (waypointsArray1[i].replace(",", "") != " ") {
+                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + waypointsArray1[i].replace(",", "") + `&fields=rating,geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                    .then(res => res.json())
 
-                    const destinationObj = {};
+                    .then(async intermediate => {
 
-                    destinationObj.place_id = intermediate.result.place_id;
+                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + DepartureID.replace(" ", "") + `&destinations=place_id:` + waypointsArray1[i].replace(",", "") + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                            .then(res => res.json())
 
-                    destinationObj.image = intermediate.result.photos[0].photo_reference;
+                            .then(api4 => {
 
-                    destinationObj.name = intermediate.result.name;
+                                //Time taken to reach from starting to spot 
+                                let TravellingTime = api4.rows[0].elements[0].duration.value;
 
-                    destinationObj.marker = {
-                        latitude: endingLatitude,
-                        longitude: endingLongitude
-                    };
+                                let TimeToReachSpot = StartingTime_Seconds + TravellingTime;
 
-                    this.state.places_nearby.push(destinationObj);
+                                //console.warn(TimeToReachSpot)
 
-                });
+                                let time = TimeToReachSpot
+
+                                let Reachinghour = Math.floor(time / 3600);
+                                time %= 3600;
+                                let Reachingminutes = Math.floor(time / 60);
+
+                                console.warn("REACH TIME: " + Reachinghour + ":" + Reachingminutes)
+
+                                let Endtime = TimeToReachSpot + 3000;
+
+                                
+                                let Endhour = Math.floor(Endtime / 3600);
+                                Endtime %= 3600;
+                                let Endminutes = Math.floor(Endtime / 60);
+
+                                console.warn("END TIME: " + Endhour+":"+Endminutes)
+
+                                //Longitute and Latitude of destnation 
+                                let endingLatitude = intermediate.result.geometry.location.lat;
+                                let endingLongitude = intermediate.result.geometry.location.lng;
+
+                                const intermediateObj = {};
+
+                                intermediateObj.place_id = intermediate.result.place_id;
+
+                                if (intermediate.result.photos != undefined)
+                                    intermediateObj.image = intermediate.result.photos[0].photo_reference;
+
+                                intermediateObj.rating = intermediate.result.rating;
+
+                                intermediateObj.ReachTime = Reachinghour+":"+Reachingminutes
+                                
+                                intermediateObj.EndTime = Endhour+":"+Endminutes
+
+                                intermediateObj.name = intermediate.result.name;
+
+                                intermediateObj.marker = {
+                                    latitude: endingLatitude,
+                                    longitude: endingLongitude
+                                };
+
+                                this.state.places_nearby.push(intermediateObj);
+
+                                StartingTime_Seconds = TimeToReachSpot;
+
+
+
+                            })
+                            .catch(async api5error => {
+                                console.warn("Api 5 "+api5error)
+                                this.setState({
+                                    spinner: false
+                                });
+                            });
+
+                    })
+                    .catch(async api5error => {
+                        this.setState({
+                            spinner: false
+                        });
+                    });
             }
-           
+
         }
 
-        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DestinationID + `&fields=geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DestinationID.replace(" ", "") + `&fields=rating,geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
             .then(res => res.json())
 
             .then(async destination => {
 
+                console.warn(destination)
                 //Longitute and Latitude of destnation 
                 let endingLatitude = destination.result.geometry.location.lat;
                 let endingLongitude = destination.result.geometry.location.lng;
@@ -191,6 +273,8 @@ class SavedTripMapPage extends Component {
 
                 destinationObj.name = destination.result.name;
 
+                destinationObj.rating = destination.result.rating;
+
                 destinationObj.marker = {
                     latitude: endingLatitude,
                     longitude: endingLongitude
@@ -198,6 +282,11 @@ class SavedTripMapPage extends Component {
 
                 this.state.places_nearby.push(destinationObj);
 
+            })
+            .catch(async api5error => {
+                this.setState({
+                    spinner: false
+                });
             });
 
         this.setState({
@@ -211,16 +300,15 @@ class SavedTripMapPage extends Component {
 
     async getDirections() {
 
-        console.warn(this.state.Waypoints)
-
         var DepartureID = this.state.DepartureID;
         var DestinationID = this.state.DestinationID;
         var Waypoints = this.state.Waypoints;
 
-        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + DepartureID + `&destination=place_id:` + DestinationID + `&waypoints=optimize:true|` + Waypoints + `&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
+        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + DepartureID + `&destination=place_id:` + DestinationID.replace(" ", "") + `&waypoints=optimize:true|` + Waypoints.replace(" ", "") + `&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
 
         const respJson = await resp.json();
         if (respJson.routes.length > 0) {
+
             const startingLong = respJson.routes[0].legs[0].start_location.lng;
             const startingLat = respJson.routes[0].legs[0].start_location.lat;
             const endingLat = respJson.routes[0].legs[0].end_location.lat;
@@ -256,30 +344,6 @@ class SavedTripMapPage extends Component {
         }
 
     }
-
-    // async savetrip() {
-    //     let email = await AsyncStorage.getItem('Email');
-    //     let destinationPlaceID1 = "ChIJDZUT1dY9sz4RJniLuy58ltM"; //await AsyncStorage.getItem('destinationPlaceID');
-    //     let departurePlaceID1 = "ChIJpe3UA-I4sz4R2HyQM4ea-pQ"; //await AsyncStorage.getItem('departurePlaceID');
-
-    //     this.setState({
-    //         spinner: true
-    //     });
-
-    //     await fetch('http://192.168.0.100:3006/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + '&Waypoints=' + this.state.query + ' ')
-    //         .then(users => {
-
-    //             alert("inserted");
-    //             this.props.navigation.navigate("Home");
-    //         })
-    //         .catch(res => {
-
-    //         });
-
-    //     this.setState({
-    //         spinner: false
-    //     });
-    // }
 
     render() {
         const { startingLat, startingLong, places_nearby, finalstring } = this.state;
@@ -326,18 +390,7 @@ class SavedTripMapPage extends Component {
                     scrollEventThrottle={1}
                     showsHorizontalScrollIndicator={false}
                     snapToInterval={CARD_WIDTH}
-                    // onScroll={Animated.event(
-                    //   [
-                    //     {
-                    //       nativeEvent: {
-                    //         contentOffset: {
-                    //           x: this.animation,
-                    //         },
-                    //       },
-                    //     },
-                    //   ],
-                    //   { useNativeDriver: true }
-                    // )}
+
                     style={styles.scrollView}
                     contentContainerStyle={styles.endPadding}
                 >
@@ -352,9 +405,11 @@ class SavedTripMapPage extends Component {
                                 resizeMode="cover"
                             />
                             <View style={styles.textContent}>
-                                {/* <Text numberOfLines={1} style={styles.cardDescription}>{marker.image}</Text> */}
                                 <Text numberOfLines={1} style={styles.cardtitle}>{marker.name}</Text>
-                                <Text numberOfLines={1} style={styles.cardDescription}>Counter: {marker.counter}</Text>
+                                <Text numberOfLines={1} style={styles.cardDescription}></Text>
+                                <Text numberOfLines={1} style={styles.cardDescription}>Rating: {marker.rating}</Text>
+                                <Text numberOfLines={1} style={styles.cardDescription}>ReachTime : {marker.ReachTime}</Text>
+                                <Text numberOfLines={1} style={styles.cardDescription}>TimeSpent: {marker.EndTime}</Text>
                             </View>
                         </View>
 
@@ -372,6 +427,15 @@ class SavedTripMapPage extends Component {
 }
 
 const styles = StyleSheet.create({
+    buttonContainer: {
+        paddingHorizontal: theme.SIZES.BASE * 4,
+        marginBottom: theme.SIZES.BASE,
+        justifyContent: "center",
+        width: width,
+        height: theme.SIZES.BASE * 4,
+        shadowRadius: 0,
+        shadowOpacity: 0
+    },
     map: {
         position: 'absolute',
         top: 0,
@@ -413,7 +477,7 @@ const styles = StyleSheet.create({
         overflow: "hidden",
     },
     cardImage: {
-        flex: 3,
+        flex: 1.5,
         width: "100%",
         height: "100%",
         alignSelf: "center",
@@ -422,12 +486,12 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cardtitle: {
-        fontSize: 12,
+        fontSize: 14,
         marginTop: 5,
         fontWeight: "bold",
     },
     cardDescription: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#444",
     },
     markerWrap: {

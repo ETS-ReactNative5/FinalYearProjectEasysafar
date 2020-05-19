@@ -20,12 +20,13 @@ import Polyline from '@mapbox/polyline';
 import haversine from 'haversine-distance'
 
 var distance = require('euclidean-distance')
-
+import { Block, theme } from 'galio-framework';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 const { width, height } = Dimensions.get("window");
 
 const CARD_HEIGHT = height / 3;
+import { Button } from 'react-native-elements';
 
 const CARD_WIDTH = CARD_HEIGHT - 100;
 
@@ -59,6 +60,8 @@ class createtrip extends Component {
 
             flag: 0,
             max: -100,
+            departurename:"",
+            destinationname:""
 
 
 
@@ -70,15 +73,49 @@ class createtrip extends Component {
 
     }
 
+    async saveTrip() {
+        let ip = await AsyncStorage.getItem('ip');
+        let email = await AsyncStorage.getItem('Email');
+        let StartTime = await AsyncStorage.getItem('TripStartTime');
+        let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
+        let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
+
+        let TripStartDate = await AsyncStorage.getItem('TripStartDate');
+        let LunchTime = await AsyncStorage.getItem('LunchTime');
+        let DinnerTime = await AsyncStorage.getItem('DinnerTime');
+
+        let waypoints = this.state.query;
+
+        this.setState({
+            spinner: true
+        });
+
+        await fetch('http://' + ip + ':3006/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + ' &Waypoints=' + waypoints + ' &DepartureName=' + this.state.departurename + ' &DestinationName=' + this.state.destinationname + ' &TripStartDate=' + TripStartDate + ' &StartTime=' + StartTime + ' &LunchTime=' + LunchTime + '&DinnerTime=' + DinnerTime + ' ')
+            .then(users => {
+
+                alert("inserted");
+
+                this.setState({
+                    spinner: false
+                });
+            })
+            .catch(res => {
+                this.setState({
+                    spinner: false
+                });
+            });
+
+     
+    }
+
     async function() {
 
         var TypesSelected = await AsyncStorage.getItem('OptiosnSelected');
         var TypesSelectedArray = TypesSelected.split(",");
 
-        console.warn(TypesSelectedArray)
-        // this.setState({
-        //     spinner: true
-        // });
+        this.setState({
+            spinner: true
+        });
 
         //Start Time in seconds
         let StartTime = await AsyncStorage.getItem('TripStartTime');
@@ -86,11 +123,8 @@ class createtrip extends Component {
 
         //Destination ID
         let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
-        // let destinationPlaceID1 = "ChIJDZUT1dY9sz4RJniLuy58ltM";  
 
         let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
-        // let departurePlaceID1 = "ChIJpe3UA-I4sz4R2HyQM4ea-pQ"; 
-
 
         await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
             .then(res => res.json())
@@ -111,10 +145,11 @@ class createtrip extends Component {
 
 
                 startingObj.name = starting.result.name;
+                this.setState({departurename: starting.result.name})
 
                 startingObj.rating = starting.result.rating;
 
-                startingObj.StartTime = await AsyncStorage.getItem('TripStartTime');
+                startingObj.StartTime = this.state.StartTime;
 
                 startingObj.marker = {
                     latitude: startingLatitude,
@@ -141,6 +176,7 @@ class createtrip extends Component {
                             destinationObj.image = destination.result.photos[0].photo_reference;
 
                         destinationObj.name = destination.result.name;
+                        this.setState({destinationname:destination.result.name})
 
                         destinationObj.rating = destination.result.rating;
 
@@ -178,7 +214,7 @@ class createtrip extends Component {
                         while (SpotToDestination > 1000) {
                             // while (i < 2) {
 
-                            for (var k = 0; k < TypesSelectedArray.length-1; k++) {
+                            for (var k = 0; k < TypesSelectedArray.length - 1; k++) {
 
                                 i = i + 1;
 
@@ -193,11 +229,13 @@ class createtrip extends Component {
 
                                     count = 0;
 
-                                    let Reachingtime = parseInt(StartTripTime_seconds) + parseInt(place1[1]);
+                                     
 
                                     let Endtime = parseInt(StartTripTime_seconds) + parseInt(place1[1]) + 3000;
 
                                     StartTripTime_seconds = Reachingtime + (50 * 60);
+
+                                    
 
                                     await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1[0] + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                                         .then(res => res.json())
@@ -211,7 +249,7 @@ class createtrip extends Component {
                                             const d = { latitude: endingLatitude, longitude: endingLongitude }
 
                                             SpotToDestination = haversine(c, d);
-
+                                            let Reachingtime = StartTripTime_seconds
                                             let Reachinghour = Math.floor(Reachingtime / 3600);
                                             Reachingtime %= 3600;
                                             let Reachingminutes = Math.floor(Reachingtime / 60);
@@ -220,7 +258,7 @@ class createtrip extends Component {
                                             Endtime %= 3600;
                                             let Endminutes = Math.floor(Endtime / 60);
 
-                                            console.warn(SpotToDestination + " " + intermediate.result.name + " " + Reachinghour + ":" + Reachingminutes)
+                                            // console.warn(SpotToDestination + " " + intermediate.result.name + " " + Reachinghour + ":" + Reachingminutes)
 
                                             const intermediateObj = {};
 
@@ -258,7 +296,10 @@ class createtrip extends Component {
 
                                         })
                                         .catch(async api5error => {
-                                            console.warn("Details " + api5error)
+                                            console.warn("API ERROR "+api5error)
+                                            this.setState({
+                                                spinner: false
+                                            });
                                         });
 
                                 }
@@ -273,9 +314,6 @@ class createtrip extends Component {
 
                                     StartTripTime_seconds = parseInt(StartTripTime_seconds);
 
-                                    console.warn("NULL " + place)
-                                    console.log("NULL " + place)
-
                                     radius = radius * 2;
 
                                     if (radius > 50000) {
@@ -288,9 +326,6 @@ class createtrip extends Component {
                                 }
                             }
 
-
-
-
                         }
 
                         this.state.places_nearby.push(destinationObj);
@@ -302,11 +337,17 @@ class createtrip extends Component {
                         this.getDirections();
                     })
                     .catch(async api5error => {
-                        console.warn("Destination " + api5error)
+                        console.warn("API ERROR "+api5error)
+                        this.setState({
+                            spinner: false
+                        });
                     });
             })
             .catch(async api5error => {
-                console.warn("Starting " + api5error)
+                console.warn("API ERROR "+api5error)
+                this.setState({
+                    spinner: false
+                });
             });
 
 
@@ -371,7 +412,7 @@ class createtrip extends Component {
                             let distanceStartToEnd = haversine(a, b);
 
                             //API for places nearby starting location
-                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=`+type+`&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=` + type + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
                                 .then(res => res.json())
 
                                 .then(async api3 => {
@@ -421,7 +462,7 @@ class createtrip extends Component {
                                                                 let Startminutes_seconds = parseInt(Startminutes) * 60;
                                                                 let OpenTime_place = Starthours_seconds + Startminutes_seconds;
 
-                                                              
+
 
                                                                 // if (CloseTime_place < 43200) {
                                                                 //     CloseTime_place = CloseTime_place + 86400;
@@ -502,7 +543,6 @@ class createtrip extends Component {
 
     }
 
-
     async getDirections() {
         const { query } = this.state;
 
@@ -561,82 +601,118 @@ class createtrip extends Component {
 
 
         return (
-            <View style={styles.container}>
-                <Spinner
-                    visible={this.state.spinner}
-                    textContent={'Preparing your trip'}
-                    textStyle={styles.spinnerTextStyle}
-                />
+            <View style={{ flex: 1 }}>
+                <View style={styles.container}>
+                    <Spinner
+                        visible={this.state.spinner}
+                        textContent={'Preparing your trip'}
+                        textStyle={styles.spinnerTextStyle}
+                    />
 
-                <MapView style={styles.map} initialRegion={{
-                    latitude: startingLat,
-                    longitude: startingLong,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421
-                }}>
+                    <MapView style={styles.map} initialRegion={{
+                        latitude: startingLat,
+                        longitude: startingLong,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421
+                    }}>
 
-                    {places_nearby.map((marker, i) => (
+                        {places_nearby.map((marker, i) => (
 
-                        <MapView.Marker
-                            key={i}
-                            coordinate={{
-                                latitude: marker.marker.latitude,
-                                longitude: marker.marker.longitude
-                            }}
-                            title={marker.name}
-                        >
+                            <MapView.Marker
+                                key={i}
+                                coordinate={{
+                                    latitude: marker.marker.latitude,
+                                    longitude: marker.marker.longitude
+                                }}
+                                title={marker.name}
+                            >
 
-                        </MapView.Marker>
-                    ))}
+                            </MapView.Marker>
+                        ))}
 
-                    <MapView.Polyline
-                        coordinates={this.state.coords}
-                        strokeWidth={2}
-                        strokeColor="red" />
+                        <MapView.Polyline
+                            coordinates={this.state.coords}
+                            strokeWidth={2}
+                            strokeColor="red" />
 
-                </MapView>
+                    </MapView>
 
-                <Animated.ScrollView
-                    horizontal
-                    scrollEventThrottle={1}
-                    showsHorizontalScrollIndicator={false}
-                    snapToInterval={CARD_WIDTH}
+                    <Animated.ScrollView
+                        horizontal
+                        scrollEventThrottle={1}
+                        showsHorizontalScrollIndicator={false}
+                        snapToInterval={CARD_WIDTH}
 
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.endPadding}
-                >
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.endPadding}
+                    >
 
-                    {places_nearby.map((marker, i) => (
 
-                        <View style={styles.card} key={i}>
-                            <Image
+                        {places_nearby.map((marker, i) => (
 
-                                style={styles.cardImage}
-                                source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + marker.image + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
-                                resizeMode="cover"
-                            />
-                            <View style={styles.textContent}>
-                                {/* <Text numberOfLines={1} style={styles.cardDescription}>{marker.image}</Text> */}
-                                <Text numberOfLines={1} style={styles.cardtitle}>{marker.name}</Text>
-                                <Text numberOfLines={1} style={styles.cardDescription}></Text>
-                                <Text numberOfLines={1} style={styles.cardDescription}>Rating: {marker.rating}</Text>
-                                <Text numberOfLines={1} style={styles.cardDescription}>ReachTime : {marker.ReachTime}</Text>
-                                <Text numberOfLines={1} style={styles.cardDescription}>TimeSpent: {marker.TimeSpent}</Text>
+                            <View style={styles.card} key={i}>
+                                <Image
+
+                                    style={styles.cardImage}
+                                    source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + marker.image + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+                                    resizeMode="cover"
+                                />
+                                <View style={styles.textContent}>
+                                    {/* <Text numberOfLines={1} style={styles.cardDescription}>{marker.image}</Text> */}
+                                    <Text numberOfLines={1} style={styles.cardtitle}>{marker.name}</Text>
+                                    <Text numberOfLines={1} style={styles.cardDescription}></Text>
+                                    <Text numberOfLines={1} style={styles.cardDescription}>Rating: {marker.rating}</Text>
+                                    <Text numberOfLines={1} style={styles.cardDescription}>ReachTime : {marker.ReachTime}</Text>
+                                    <Text numberOfLines={1} style={styles.cardDescription}>TimeSpent: {marker.TimeSpent}</Text>
+                                </View>
                             </View>
-                        </View>
 
 
-                    ))}
 
 
-                </Animated.ScrollView>
-            </View >
+                        ))}
+
+
+                    </Animated.ScrollView>
+
+
+
+                </View >
+
+                <View style={{ flex: 0.1 }}>
+                    <Block style={styles.buttonContainer}>
+                        <Button
+
+                            onPress={async () => {
+
+                                this.saveTrip();
+
+                            }}
+                            type="solid"
+                            iconLeft
+                            textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
+                            title=" SAVE TRIP "
+                        />
+                    </Block>
+
+                </View>
+
+            </View>
         );
     }
 
 }
 
 const styles = StyleSheet.create({
+    buttonContainer: {
+        paddingHorizontal: theme.SIZES.BASE * 4,
+        marginBottom: theme.SIZES.BASE,
+        justifyContent: "center",
+        width: width,
+        height: theme.SIZES.BASE * 4,
+        shadowRadius: 0,
+        shadowOpacity: 0
+    },
     map: {
         position: 'absolute',
         top: 0,

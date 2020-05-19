@@ -48,7 +48,7 @@ class addreview extends React.Component {
     // alert("Submitted");
     let placeid = await AsyncStorage.getItem('placeid');
     let email = await AsyncStorage.getItem('Email');
-
+    let ip = await AsyncStorage.getItem('ip');
 
     const { review, status } = this.state;
     // setTimeout(() => {
@@ -57,7 +57,7 @@ class addreview extends React.Component {
     });
     // }, 7000);
     // alert(status);
-    await fetch('http://192.168.0.107:3006/addreview?PlaceID=' + placeid + '&Email=' + email + '&Review=' + review + '&Rating=' + status + ' ')
+    await fetch('http://'+ip+':3006/addreview?PlaceID=' + placeid + '&Email=' + email + '&Review=' + review + '&Rating=' + status + ' ')
       .then(users => {
 
         alert("inserted");

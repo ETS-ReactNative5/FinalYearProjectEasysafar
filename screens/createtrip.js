@@ -41,6 +41,7 @@ class createtrip extends React.Component {
 
   constructor(props) {
     super(props);
+    
     this.state = {
       lat: null,
       long: null,
@@ -53,7 +54,7 @@ class createtrip extends React.Component {
       phone: "",
       visible: false,
       navigation: 123,
-      date: new Date(),
+      date: new Date().toJSON().slice(0,10),
       lunchTime: "03:00",
       dinnerTime: "09:00",
       startTime: "12:00",
@@ -512,21 +513,18 @@ class createtrip extends React.Component {
               let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
 
 
-              console.warn(destinationPlaceID1)
-              console.warn(departurePlaceID1)
-
               if (this.state.TypesSelected === "" || departurePlaceID1 === null || destinationPlaceID1 === null) {
-                // this.setState(() => ({ Error: "Required!" }));
+              
                 alert("All are required!");
               }
 
               else {
-                var Stime = this.state.startTime.toString();
-                AsyncStorage.setItem('TripStartTime', Stime.replace(':',''));
+                AsyncStorage.setItem('TripStartTime', this.state.startTime.toString().replace(':',''));
                 AsyncStorage.setItem('OptiosnSelected', this.state.TypesSelected);
-                AsyncStorage.setItem('TripStartDate', this.state.Date);
-                AsyncStorage.setItem('LunchTime', this.state.lunchTime);
-                AsyncStorage.setItem('DinnerTime', this.state.dinnerTime);
+                // alert(this.state.date)
+                AsyncStorage.setItem('TripStartDate', this.state.date.toString());
+                AsyncStorage.setItem('LunchTime', this.state.lunchTime.toString().replace(':',''));
+                AsyncStorage.setItem('DinnerTime', this.state.dinnerTime.toString().replace(':',''));
                 this.props.navigation.navigate("TripMapPage");
               }
 

@@ -147,23 +147,7 @@ class Home extends React.Component {
           />
         </Block>
 
-
         <MapView />
-
-        {/* <Block>
-          <ScrollView horizontal showsHorizontalScrollIndicator={true} scrollEventThrottle={10} >
-            <Block style={styles1.iconContainer}>
-              {this.getItem("image", "Amusement Park", 40, "#f50", "font-awesome", "amusement_park")}
-              {this.getItem("camera-retro", "Cinema", 40, "#031068", "font-awesome", "movie_theater")}
-              {this.getItem("fire", "Park", 40, "#f50", "font-awesome", "gas_station")}
-              {this.getItem("shopping-bag", "Clothing Store", 40, "#031068", "font-awesome", "clothing_store")}
-              {this.getItem("cutlery", "Restaurant", 40, "#f50", "font-awesome", "restaurant")}
-              {this.getItem("shopping-cart", "Mall", 40, "#031068", "font-awesome", "shopping_mall")}
-              {this.getItem("star", "Tourist Attraction", 40, "#f50", "font-awesome", "tourist_attraction")}
-              {this.getItem("bank", "Bank", 40, "#031068", "font-awesome", "bank")}
-            </Block>
-          </ScrollView>
-        </Block> */}
 
         <Block style={{ flexDirection: 'column', width: width }}>
 
@@ -295,6 +279,7 @@ class Home extends React.Component {
           />
 
         </Block>
+      
       </Block>
     );
   }
