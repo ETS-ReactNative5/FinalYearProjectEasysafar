@@ -1,12 +1,11 @@
 import React from 'react';
-import { StyleSheet, Dimensions, ScrollView, Image, View, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { StyleSheet, Dimensions, ScrollView, Image, TouchableOpacity } from 'react-native';
 //galio
 import { Block, Text, theme } from 'galio-framework';
 
 import { articles, nowTheme, Images } from '../constants';
 import { Card } from '../components';
 const { width, height } = Dimensions.get('screen');
-import Gallery from 'react-native-image-gallery';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { AsyncStorage } from 'react-native';
 
@@ -86,26 +85,17 @@ class GuidePlaceType extends React.Component {
       }
 
       const { lat, long, temp } = this.state;
-      // alert(lat );
-      // alert(long);
       this.setState({ placename: name });
       fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + long + '&units=metric&appid=ffc2402c9e6eb729217a5ed3227741ec')
         .then((response) => response.json())
         .then((responseJson) => {
-          // console.warn(responseJson.list[0].main.temp);
           this.setState({ temp: responseJson.list[0].main.temp });
-
-          // currentaddress = responseJson.results[0].formatted_address;
-          // console.log(currentaddress);
         })
-
-
     }
     catch (error) {
       alert(error)
     }
   }
-
 
   render() {
     const { image, temp } = this.state;
@@ -117,11 +107,10 @@ class GuidePlaceType extends React.Component {
             style={{ width: width, height: theme.SIZES.BASE * 15 }}
           />
           <Block style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end', color: 'white' }}>
-
-
           </Block>
         </Block>
-        {/* <Text style={{fontWeight: 'bold', fontSize: 40, color: 'white', fontFamily: 'montserrat-regular'}}>{temp} C</Text> */}
+        <Block style={{flexDirection:'column'}}>
+          <Text  style={{ fontSize: 25, marginLeft: 10, lineHeight: 22, fontWeight: 'bold', color: 'white' }}>{this.state.placename}</Text>
         <Text style={{ fontSize: 25, marginLeft: 10, lineHeight: 22, fontWeight: 'bold', color: 'white' }}>
           {temp}
           <Text style={{ fontSize: 10, lineHeight: 25 * 1.1, fontWeight: 'bold', textAlignVertical: 'bottom', color: 'white' }}>
@@ -129,7 +118,7 @@ class GuidePlaceType extends React.Component {
           </Text>
           C
           </Text>
-        {/* <Text>What are you looking for in {this.state.placename}?</Text> */}
+          </Block>
         <Block style={{ width: width, flex: 0.6, marginTop: theme.SIZES.BASE }}>
           <ScrollView
             vertical
@@ -264,9 +253,6 @@ class GuidePlaceType extends React.Component {
 
 const styles = StyleSheet.create({
   group: {
-    //alignItems: 'center',
-    //justifyContent: 'center',
-    //marginTop: theme.SIZES.BASE,
     flex: 0.4,
     width: width
   },
@@ -282,6 +268,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button2: {
     alignItems: 'center',
@@ -295,6 +283,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button3: {
     alignItems: 'center',
@@ -308,6 +298,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button4: {
     alignItems: 'center',
@@ -319,9 +311,10 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    // width: width - theme.SIZES.BASE * 15,
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button5: {
     alignItems: 'center',
@@ -335,6 +328,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button6: {
     alignItems: 'center',
@@ -348,6 +343,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button7: {
     alignItems: 'center',
@@ -361,6 +358,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button8: {
     alignItems: 'center',
@@ -374,6 +373,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
   button9: {
     alignItems: 'center',
@@ -387,6 +388,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     width: width / 3,
     height: theme.SIZES.BASE * 8,
+    borderRadius: 20,
+    opacity: 0.6
   },
 
   iconContainer: {
@@ -396,13 +399,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingHorizontal: theme.SIZES.BASE * 4,
-    // flex: 1,
     marginBottom: theme.SIZES.BASE,
-    // width: width - theme.SIZES.BASE * 2,
-    // height: theme.SIZES.BASE * 3, 
-    // alignItems: 'center',
     justifyContent: "center",
-    //backgroundColor: theme.COLORS.SUCCESS,
     width: width,
     height: theme.SIZES.BASE * 4,
     shadowRadius: 0,
@@ -455,7 +453,6 @@ const styles1 = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: theme.SIZES.BASE * 2,
     paddingHorizontal: theme.SIZES.BASE,
-    //marginBottom: theme.SIZES.BASE * -0.5,
   },
   map: {
     ...StyleSheet.absoluteFillObject
@@ -489,7 +486,6 @@ const styles1 = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    //marginTop: 20,
     width: 100,
     borderRadius: 30,
     alignContent: "center",
@@ -501,7 +497,6 @@ const styles1 = StyleSheet.create({
   suggestions: {
     height: 40,
     backgroundColor: 'white',
-    //  justifyContent: 'center',
     paddingHorizontal: 10,
 
   }

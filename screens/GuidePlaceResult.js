@@ -3,18 +3,13 @@ import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from "react-native";
 import { GOOGLE_API_KEY } from "react-native-dotenv";
 import { AsyncStorage } from 'react-native';
-import {
-    FlatList,
-    ActivityIndicator,
-} from "react-native";
+import { FlatList, ActivityIndicator } from "react-native";
 import { ListItem } from "react-native-elements";
 import { Container, Content } from "native-base";
 const { height, width } = Dimensions.get('screen');
 import { Card } from 'react-native-elements';
 
-
 class GuidePlaceResult extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -30,16 +25,13 @@ class GuidePlaceResult extends Component {
         };
     }
     componentDidMount() {
-
         this.displayData()
-
     }
 
     displayData = async () => {
         try {
             let name = await AsyncStorage.getItem('name');
             let guidetype = await AsyncStorage.getItem('guidetype');
-            // alert(name);
             if (name == "Lahore, Punjab") {
                 this.setState({
                     placename: name,
@@ -100,7 +92,6 @@ class GuidePlaceResult extends Component {
                 });
                 this.getPlaces();
             }
-
         }
         catch (error) {
             alert(error)
@@ -122,7 +113,6 @@ class GuidePlaceResult extends Component {
         const url = this.getPlacesUrl(lat, long, radius, placeType, GOOGLE_API_KEY);
         fetch(url)
             .then(res => res.json())
-
             .then(res => {
                 res.results.map((element, index) => {
 
@@ -138,7 +128,6 @@ class GuidePlaceResult extends Component {
                         latitude: element.geometry.location.lat,
                         longitude: element.geometry.location.lng
                     };
-
                     markers.push(marketObj);
                 });
                 this.setState({ places: markers });
@@ -215,7 +204,7 @@ class PlaceList extends Component {
 
     render() {
 
-        const { places, navigation, placeid, placeType } = this.props;
+        const { places, placeType } = this.props;
         const baseImage =
             "https://images.unsplash.com/photo-1552334405-4929565998d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80";
         return (
@@ -238,7 +227,6 @@ class PlaceList extends Component {
                                             this.props.navigation.navigate("Details");
 
                                         }
-
                                         }>
                                             <ListItem
                                                 key={item.id}

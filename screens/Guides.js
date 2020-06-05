@@ -17,7 +17,6 @@ class Guides extends React.Component {
         </Block>
         
         <Card item={articles[4]} full />
-        
         <Block flex row>
           <Card item={articles[0]} style={{ marginRight: theme.SIZES.BASE }} />
           <Card item={articles[3]} />
@@ -26,7 +25,6 @@ class Guides extends React.Component {
           <Card item={articles[1]} style={{ marginRight: theme.SIZES.BASE }} />
           <Card item={articles[2]} />
         </Block>
-        
         <Card item={articles[5]} full />
       </Block>
     );  
@@ -40,8 +38,6 @@ class Guides extends React.Component {
     );
   }
 }
-
-
 
 const styles = StyleSheet.create({
   container: {

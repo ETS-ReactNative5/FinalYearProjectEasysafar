@@ -21,6 +21,7 @@ import addreview from '../screens/addreview'
 import makeowntrip from '../screens/makeowntrip'
 import OwnTripMapPage from '../screens/OwnTripMapPage'
 import SavedTripMapPage from '../screens/SavedTripMapPage'
+import makeowntripplaces from '../screens/makeowntripplaces'
 
 // drawer 
 import Menu from './Menu';
@@ -152,6 +153,15 @@ const MakeowntripStack = createStackNavigator(
       navigationOptions: ({ navigation }) => ({
         header: (
           <Header transparent title="Make my own trip" iconColor={'#333'} navigation={navigation} />
+        ),
+        headerTransparent: true
+      })
+    },
+    makeowntripplaces:{
+      screen: makeowntripplaces,
+      navigationOptions: ({ navigation }) => ({
+        header: (
+          <Header transparent title="Make my own trip places" iconColor={'#333'} navigation={navigation} />
         ),
         headerTransparent: true
       })

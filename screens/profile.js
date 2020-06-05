@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Dimensions, ScrollView, Image, ImageBackground, Platform } from 'react-native';
 import { Block, Text, theme, Button as GaButton } from 'galio-framework';
+import { GOOGLE_API_KEY } from "react-native-dotenv";
 import { LinearGradient } from 'expo-linear-gradient';
 import { nowTheme } from '../constants';
 import { Icon } from '../components';
@@ -12,7 +13,6 @@ const { width, height } = Dimensions.get('screen');
 const thumbMeasure = (width - 48 - 32) / 2;
 
 const CARD_HEIGHT = height / 4;
-const CARD_WIDTH = CARD_HEIGHT + 10;
 
 class Profile extends React.Component {
   constructor(props) {
@@ -49,7 +49,7 @@ class Profile extends React.Component {
       array: []
     });
     let email1 = await AsyncStorage.getItem('Email');
-    await fetch('http://' + ip + ':3006/getsavedtrips?Email=' + email1 + '')
+    await fetch('http://' + ip + '/getsavedtrips?Email=' + email1 + '')
       .then(res => res.json())
       .then(res => {
         res.map((element) => {
@@ -91,7 +91,7 @@ class Profile extends React.Component {
       array: []
     });
     let email1 = await AsyncStorage.getItem('Email');
-    await fetch('http://' + ip + ':3006/getsavedplaces?Email=' + email1 + '')
+    await fetch('http://' + ip + '/getsavedplaces?Email=' + email1 + '')
       .then(res => res.json())
 
       .then(res => {
@@ -128,7 +128,7 @@ class Profile extends React.Component {
       array: []
     });
     let email1 = await AsyncStorage.getItem('Email');
-    await fetch('http://' + ip + ':3006/getreviews?Email=' + email1 + '')
+    await fetch('http://' + ip + '/getreviews?Email=' + email1 + '')
       .then(res => res.json())
 
       .then(res => {
@@ -174,7 +174,7 @@ class Profile extends React.Component {
     this.tripsHandler();
 
     //user details api
-    await fetch('http://' + ip + ':3006/userprofile?Email=' + email1 + '')
+    await fetch('http://' + ip + '/userprofile?Email=' + email1 + '')
       .then(res => res.json())
 
       .then(user => {
@@ -189,7 +189,7 @@ class Profile extends React.Component {
       })
 
     //trip count api
-    await fetch('http://' + ip + ':3006/usertripscount?Email=' + email1 + '')
+    await fetch('http://' + ip + '/usertripscount?Email=' + email1 + '')
       .then(res => res.json())
       .then(user => {
 
@@ -199,7 +199,7 @@ class Profile extends React.Component {
       })
 
     //place count api
-    await fetch('http://' + ip + ':3006/userplacescount?Email=' + email1 + '')
+    await fetch('http://' + ip + '/userplacescount?Email=' + email1 + '')
       .then(res => res.json())
       .then(user => {
         // alert(user[0].count);
@@ -210,7 +210,7 @@ class Profile extends React.Component {
       })
 
     //review count api
-    await fetch('http://' + ip + ':3006/userreviewscount?Email=' + email1 + '')
+    await fetch('http://' + ip + '/userreviewscount?Email=' + email1 + '')
       .then(res => res.json())
       .then(user => {
         // alert(user[0].count);
@@ -312,7 +312,7 @@ class Profile extends React.Component {
               <Block style={styles.cardPlaces}>
                 <Image
                   style={styles.cardImage}
-                  source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + element.SpotPhoto + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+                  source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + element.SpotPhoto + '&key=' + GOOGLE_API_KEY + '' }}
                   resizeMode="cover"
                 />
                 <Block style={styles.textContent}>

@@ -1,17 +1,17 @@
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import React, { Component } from "react";
 import { Block, Text, theme } from 'galio-framework';
-const { width, } = Dimensions.get("screen");
-import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-elements';
 import { AsyncStorage } from 'react-native';
-import { NavigationEvents } from 'react-navigation';
+import { GOOGLE_API_KEY } from "react-native-dotenv";
+
+const { width, } = Dimensions.get("screen");
 
 class createtrip extends React.Component {
-
   componentDidMount() {
     AsyncStorage.removeItem('destinationPlaceID');
     AsyncStorage.removeItem('departurePlaceID');
@@ -82,11 +82,8 @@ class createtrip extends React.Component {
       button6opacity: 1,
       button7opacity: 1,
       button8opacity: 1,
-
       opacity: 1,
-
       TypesSelected: "",
-
       TypeError: "",
       DeparturePlace: "",
       DestinationPlace: "",
@@ -106,445 +103,384 @@ class createtrip extends React.Component {
     return (
 
       <Block style={{ flex: 1 }}>
+        <ScrollView>
+          <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1, marginLeft: 10, marginRight: 10 }}>
+            <GooglePlacesAutocomplete
+              placeholder="Departure"
+              minLength={2}
+              autoFocus={false}
+              returnKeyType={'search'}
+              listViewDisplayed="true"
+              fetchDetails={true}
+              renderDescription={row => row.description}
+              onPress={(data, details = null) => {
+                AsyncStorage.setItem('departurePlaceID', details.place_id);
+              }}
+              getDefaultValue={() => {
+                return ''; // text input default value
+              }}
+              query={{
 
-        <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1 }}>
+                key: GOOGLE_API_KEY,
+                language: 'en',
 
-          <GooglePlacesAutocomplete
-            placeholder="Departure Location"
-            minLength={2}
-            autoFocus={false}
-            returnKeyType={'search'}
-            listViewDisplayed="true"
-            fetchDetails={true}
-            renderDescription={row => row.description}
-            onPress={(data, details = null) => {
+              }}
+              styles={{
+                description: {
+                  fontWeight: 'bold',
+                  backgroundColor: "white",
+                  fontSize: 15,
+                  flex: 1
+                },
+                predefinedPlacesDescription: {
+                  color: '#1faadb',
+                },
+              }}
 
-              AsyncStorage.setItem('departurePlaceID', details.place_id);
+              nearbyPlacesAPI="GooglePlacesSearch"
+              GoogleReverseGeocodingQuery={
+                {
 
-
-            }}
-            getDefaultValue={() => {
-              return ''; // text input default value
-            }}
-            query={{
-
-              key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
-              language: 'en',
-
-            }}
-            styles={{
-              description: {
-                fontWeight: 'bold',
-                backgroundColor: "white",
-                fontSize: 15,
-                flex: 1
-              },
-              predefinedPlacesDescription: {
-                color: '#1faadb',
-              },
-            }}
-
-            nearbyPlacesAPI="GooglePlacesSearch"
-            GoogleReverseGeocodingQuery={
-              {
-
+                }
               }
-            }
-            GooglePlacesSearchQuery={{
+              GooglePlacesSearchQuery={{
 
-              rankby: 'distance',
-              radius: 1000
-            }}
-            filterReverseGeocodingByTypes={[
-              'locality',
-              'administrative_area_level_3',
-            ]}
-
-            debounce={200}
-          />
-        </Block>
-
-        {/* Start Time and Date */}
-        <Block style={{ flexDirection: 'row', width: width }}>
-
-          <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
-
-            <Block style={{ marginLeft: theme.SIZES.BASE * 2 }}>
-              <Text>Start Time: </Text>
-            </Block>
-
-            <Block width={width * 0.5} style={{ marginLeft: theme.SIZES.BASE * 2, justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
-              <DatePicker
-                style={{ width: 120 }}
-                date={this.state.startTime} //initial date from state
-                mode="time" //The enum of date, datetime and time
-                confirmBtnText="Confirm"
-                cancelBtnText="Cancel"
-                customStyles={{
-                  dateIcon: {
-                    position: 'absolute',
-                    left: 0,
-                    top: 4,
-                    marginLeft: 0,
-                  },
-                  dateInput: {
-                    marginLeft: 36,
-                  },
-                }}
-                onDateChange={startTime => {
-                
-                  this.setState({ startTime: startTime });
-                }}
-              />
-            </Block>
-
+                rankby: 'distance',
+                radius: 1000
+              }}
+              filterReverseGeocodingByTypes={[
+                'locality',
+                'administrative_area_level_3',
+              ]}
+              debounce={200}
+            />
           </Block>
 
-          <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
-
-            <Block>
-              <Text>Start Date: </Text>
+          {/* Start Time and Date */}
+          <Block style={{ flexDirection: 'row', width: width }}>
+            <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
+              <Block style={{ marginLeft: theme.SIZES.BASE * 2 }}>
+                <Text>Start Time: </Text>
+              </Block>
+              <Block width={width * 0.5} style={{ marginLeft: theme.SIZES.BASE * 2, justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
+                <DatePicker
+                  style={{ width: 120 }}
+                  date={this.state.startTime} //initial date from state
+                  mode="time" //The enum of date, datetime and time
+                  confirmBtnText="Confirm"
+                  cancelBtnText="Cancel"
+                  customStyles={{
+                    dateIcon: {
+                      position: 'absolute',
+                      left: 0,
+                      top: 4,
+                      marginLeft: 0,
+                    },
+                    dateInput: {
+                      marginLeft: 36,
+                    },
+                  }}
+                  onDateChange={startTime => {
+                    this.setState({ startTime: startTime });
+                  }}
+                />
+              </Block>
             </Block>
 
-            <Block width={width * 0.5} style={{ justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
-              <DatePicker
-                style={{ width: 120 }}
-                date={this.state.date} //initial date from state
-                mode="date" //The enum of date, datetime and time
-                placeholder="select date"
-                format="DD-MM-YYYY"
-                minDate="05-07-2020"
-                maxDate="01-01-2023"
-                confirmBtnText="Confirm"
-                cancelBtnText="Cancel"
-                customStyles={{
-                  dateIcon: {
-                    position: 'absolute',
-                    left: 0,
-                    top: 4,
-                    marginLeft: 0,
-                  },
-                  dateInput: {
-                    marginLeft: 36,
-                  },
-                }}
-                onDateChange={date => {
+            <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
+              <Block>
+                <Text>Start Date: </Text>
+              </Block>
+
+              <Block width={width * 0.5} style={{ justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
+                <DatePicker
+                  style={{ width: 120 }}
+                  date={this.state.date} //initial date from state
+                  mode="date" //The enum of date, datetime and time
+                  placeholder="select date"
+                  format="DD-MM-YYYY"
+                  minDate="05-07-2020"
+                  maxDate="01-01-2023"
+                  confirmBtnText="Confirm"
+                  cancelBtnText="Cancel"
+                  customStyles={{
+                    dateIcon: {
+                      position: 'absolute',
+                      left: 0,
+                      top: 4,
+                      marginLeft: 0,
+                    },
+                    dateInput: {
+                      marginLeft: 36,
+                    },
+                  }}
+                  onDateChange={date => {
+                    this.setState({ date: date });
+                  }}
+                />
+              </Block>
+            </Block>
+          </Block>
+
+          <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 2, marginLeft: 10, marginRight: 10 }}>
+            <GooglePlacesAutocomplete
+              placeholder="Destination"
+              minLength={2}
+              autoFocus={false}
+              returnKeyType={'search'}
+              listViewDisplayed="true"
+              fetchDetails={true}
+              renderDescription={row => row.description}
+              onPress={(data, details = null) => {
+                AsyncStorage.setItem('destinationPlaceID', details.place_id);
+              }}
+              getDefaultValue={() => {
+                return ''; // text input default value
+              }}
+              query={{
+                key: GOOGLE_API_KEY,
+                language: 'en',
+              }}
+              styles={{
+                description: {
+                  fontWeight: 'bold',
+                  backgroundColor: "white",
+                  fontSize: 15,
+                  flex: 1
+                },
+                predefinedPlacesDescription: {
+                  color: '#1faadb',
+                },
+              }}
+
+              nearbyPlacesAPI="GooglePlacesSearch"
+              GoogleReverseGeocodingQuery={
+                {
+                }
+              }
+              GooglePlacesSearchQuery={{
+                rankby: 'distance',
+                radius: 1000
+              }}
+              filterReverseGeocodingByTypes={[
+                'locality',
+                'administrative_area_level_3',
+              ]}
+              debounce={200}
+            />
+          </Block>
+
+          {/* Lunch and Dinner Time */}
+          <Block style={{ flexDirection: 'row', width: width }}>
+            <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
+              <Block style={{ marginLeft: theme.SIZES.BASE * 2 }}>
+                <Text>Lunch Time: </Text>
+              </Block>
+
+              <Block width={width * 0.5} style={{ marginLeft: theme.SIZES.BASE * 2, justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
+                <DatePicker
+                  style={{ width: 120 }}
+                  date={this.state.lunchTime} //initial date from state
+                  mode="time" //The enum of date, datetime and time
+                  confirmBtnText="Confirm"
+                  cancelBtnText="Cancel"
+                  customStyles={{
+                    dateIcon: {
+                      position: 'absolute',
+                      left: 0,
+                      top: 4,
+                      marginLeft: 0,
+                    },
+                    dateInput: {
+                      marginLeft: 36,
+                    },
+                  }}
+                  onDateChange={lunchTime => {
+                    this.setState({ lunchTime: lunchTime });
+                  }}
+                />
+              </Block>
+            </Block>
+
+            <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
+              <Block>
+                <Text>Dinner Time: </Text>
+              </Block>
+
+              <Block width={width * 0.5} style={{ justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
+                <DatePicker
+                  style={{ width: 120 }}
+                  date={this.state.dinnerTime} //initial date from state
+                  mode="time" //The enum of date, datetime and time
+                  confirmBtnText="Confirm"
+                  cancelBtnText="Cancel"
+                  customStyles={{
+                    dateIcon: {
+                      position: 'absolute',
+                      left: 0,
+                      top: 4,
+                      marginLeft: 0,
+                    },
+                    dateInput: {
+                      marginLeft: 36,
+                    },
+                  }}
+                  onDateChange={dinnerTime => {
                   
-                  this.setState({ date: date });
-                }}
-              />
+                    this.setState({ dinnerTime: dinnerTime });
+                  }}
+                />
+              </Block>
             </Block>
           </Block>
 
-        </Block>
+          {/* Types */}
+          <Block style={{ paddingTop: theme.SIZES.BASE, flexDirection: 'row', width: width }}>
+            <Block style={{ opacity: this.state.button1opacity }}>
+              <TouchableOpacity
+                disabled={this.state.button1enable}
+                style={styles.button1}
+                onPress={() => {
+                  this.setState({
+                    button1enable: true,
+                    button1opacity: 0.5,
+                    TypesSelected: this.state.TypesSelected + "amusement_park,"
+                  })
+                }}
+              >
+                <Ionicons name="md-star" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Amusement</Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Park</Text>
+              </TouchableOpacity>
+            </Block>
 
-        <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 2 }}>
-          <GooglePlacesAutocomplete
-            placeholder="Destination Location"
-            minLength={2}
-            autoFocus={false}
-            returnKeyType={'search'}
-            listViewDisplayed="true"
-            fetchDetails={true}
-            renderDescription={row => row.description}
-            onPress={(data, details = null) => {
+            <Block style={{ opacity: this.state.button2opacity }}>
+              <TouchableOpacity
+                disabled={this.state.button2enable}
+                style={styles.button2}
+                onPress={() => {
+                  this.setState({
+                    button2enable: true,
+                    button2opacity: 0.5,
+                    TypesSelected: this.state.TypesSelected + "tourist_attraction,"
+                  })
+                }}
+              >
+                <Ionicons name="ios-bed" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Tourist </Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Attraction</Text>
+              </TouchableOpacity>
+            </Block>
 
-              AsyncStorage.setItem('destinationPlaceID', details.place_id);
+            <Block style={{ opacity: this.state.button5opacity }}>
+              <TouchableOpacity
+                disabled={this.state.button5enable}
+                style={styles.button5}
+                onPress={() => {
+                  this.setState({
+                    button5enable: true,
+                    button5opacity: 0.5,
+                    TypesSelected: this.state.TypesSelected + "movie_theater,"
+                  })
+                }}
+              >
+                <Ionicons name="md-film" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Cinemas</Text>
+              </TouchableOpacity>
+            </Block>
+          </Block>
 
+          <Block style={{ flexDirection: 'row', width: width }}>
+            <Block style={{ opacity: this.state.button6opacity }}>
+              <TouchableOpacity
+                disabled={this.state.button6enable}
+                style={styles.button6}
+                onPress={() => {
+                  this.setState({
+                    button6enable: true,
+                    button6opacity: 0.5,
+                    TypesSelected: this.state.TypesSelected + "shopping_mall,"
+                  })
+                }}
+              >
+                <FontAwesome name="shopping-cart" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Shopping</Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Malls</Text>
+              </TouchableOpacity>
+            </Block>
 
-            }}
-            getDefaultValue={() => {
-              return ''; // text input default value
-            }}
-            query={{
+            <Block style={{ opacity: this.state.button7opacity }}>
+              <TouchableOpacity
+                disabled={this.state.button7enable}
+                style={styles.button7}
+                onPress={() => {
+                  this.setState({
+                    button7enable: true,
+                    button7opacity: 0.5,
+                    TypesSelected: this.state.TypesSelected + "art_gallery,"
+                  })
+                }}
+              >
+                <FontAwesome name="shopping-bag" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Art</Text>
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Gallery</Text>
+              </TouchableOpacity>
+            </Block>
 
-              key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
-              language: 'en',
+            <Block style={{ opacity: this.state.button8opacity }}>
+              <TouchableOpacity
+                disabled={this.state.button8enable}
+                style={styles.button8}
+                onPress={() => {
+                  this.setState({
+                    button8enable: true,
+                    button8opacity: 0.5,
+                    TypesSelected: this.state.TypesSelected + "museum,"
+                  })
+                }}
+              >
+                <FontAwesome name="building" size={32} color="white" />
+                <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Museums</Text>
+              </TouchableOpacity>
+            </Block>
+          </Block>
 
-            }}
-            styles={{
-              description: {
-                fontWeight: 'bold',
-                backgroundColor: "white",
-                fontSize: 15,
-                flex: 1
-              },
-              predefinedPlacesDescription: {
-                color: '#1faadb',
-              },
-            }}
-
-            nearbyPlacesAPI="GooglePlacesSearch"
-            GoogleReverseGeocodingQuery={
-              {
-
+          <Block style={styles.buttonContainer}>
+            <Button
+              icon={
+                <Icon
+                  name="car"
+                  size={15}
+                  color="191970"
+                />
               }
-            }
-            GooglePlacesSearchQuery={{
-
-              rankby: 'distance',
-              radius: 1000
-            }}
-            filterReverseGeocodingByTypes={[
-              'locality',
-              'administrative_area_level_3',
-            ]}
-
-            debounce={200}
-          />
-        </Block>
-
-        {/* Lunch and Dinner Time */}
-        <Block style={{ flexDirection: 'row', width: width }}>
-
-          <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
-
-            <Block style={{ marginLeft: theme.SIZES.BASE * 2 }}>
-              <Text>Lunch Time:: </Text>
-            </Block>
-
-            <Block width={width * 0.5} style={{ marginLeft: theme.SIZES.BASE * 2, justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
-              <DatePicker
-                style={{ width: 120 }}
-                date={this.state.lunchTime} //initial date from state
-                mode="time" //The enum of date, datetime and time
-                confirmBtnText="Confirm"
-                cancelBtnText="Cancel"
-                customStyles={{
-                  dateIcon: {
-                    position: 'absolute',
-                    left: 0,
-                    top: 4,
-                    marginLeft: 0,
-                  },
-                  dateInput: {
-                    marginLeft: 36,
-                  },
-                }}
-                onDateChange={lunchTime => {
-                
-                  this.setState({ lunchTime: lunchTime });
-                }}
-              />
-            </Block>
-
-          </Block>
-
-          <Block style={{ marginLeft: 0, marginRight: 10, flexDirection: 'column', paddingTop: theme.SIZES.BASE * 1 }}>
-
-            <Block>
-              <Text>Dinner Time: </Text>
-            </Block>
-
-            <Block width={width * 0.5} style={{ justifyContent: 'center', paddingTop: theme.SIZES.BASE }}>
-              <DatePicker
-                style={{ width: 120 }}
-                date={this.state.dinnerTime} //initial date from state
-                mode="time" //The enum of date, datetime and time
-                confirmBtnText="Confirm"
-                cancelBtnText="Cancel"
-                customStyles={{
-                  dateIcon: {
-                    position: 'absolute',
-                    left: 0,
-                    top: 4,
-                    marginLeft: 0,
-                  },
-                  dateInput: {
-                    marginLeft: 36,
-                  },
-                }}
-                onDateChange={dinnerTime => {
-                 
-                  this.setState({ dinnerTime: dinnerTime });
-                }}
-              />
-            </Block>
-          </Block>
-
-        </Block>
-
-        {/* Types */}
-        <Block style={{ paddingTop: theme.SIZES.BASE, flexDirection: 'row', width: width }}>
-
-          <Block style={{ opacity: this.state.button1opacity }}>
-            <TouchableOpacity
-              disabled={this.state.button1enable}
-              style={styles.button1}
-
-              onPress={() => {
-                this.setState({
-                  button1enable: true,
-                  button1opacity: 0.5,
-                  TypesSelected: this.state.TypesSelected + "amusement_park,"
-                })
-
+              onPress={async () => {
+                let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
+                let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
+                if (this.state.TypesSelected === "" || departurePlaceID1 === null || destinationPlaceID1 === null) {
+                  alert("All are required!");
+                }
+                else {
+                  AsyncStorage.setItem('TripStartTime', this.state.startTime.toString().replace(':',''));
+                  AsyncStorage.setItem('OptiosnSelected', this.state.TypesSelected);
+                  AsyncStorage.setItem('TripStartDate', this.state.date.toString());
+                  AsyncStorage.setItem('LunchTime', this.state.lunchTime.toString().replace(':',''));
+                  AsyncStorage.setItem('DinnerTime', this.state.dinnerTime.toString().replace(':',''));
+                  this.props.navigation.navigate("TripMapPage");
+                }
               }}
-            >
-              <Ionicons name="md-star" size={32} color="white" />
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Amusement</Text>
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Park</Text>
-            </TouchableOpacity>
+              type="outline"
+              iconLeft
+              titleStyle={{ color: '#191970' }}
+              buttonStyle={{ borderWidth: 2, borderColor: '#191970' }}
+              textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
+              title="  START TRIP "
+            />
           </Block>
-
-          <Block style={{ opacity: this.state.button2opacity }}>
-            <TouchableOpacity
-              disabled={this.state.button2enable}
-              style={styles.button2}
-
-              onPress={() => {
-                this.setState({
-                  button2enable: true,
-                  button2opacity: 0.5,
-                  TypesSelected: this.state.TypesSelected + "tourist_attraction,"
-                })
-
-
-              }}
-            >
-              <Ionicons name="ios-bed" size={32} color="white" />
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Tourist </Text>
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Attraction</Text>
-            </TouchableOpacity>
-          </Block>
-
-          <Block style={{ opacity: this.state.button5opacity }}>
-            <TouchableOpacity
-              disabled={this.state.button5enable}
-              style={styles.button5}
-
-              onPress={() => {
-                this.setState({
-                  button5enable: true,
-                  button5opacity: 0.5,
-                  TypesSelected: this.state.TypesSelected + "movie_theater,"
-                })
-
-              }}
-            >
-              <Ionicons name="md-film" size={32} color="white" />
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Cinemas</Text>
-            </TouchableOpacity>
-          </Block>
-
-
-
-        </Block>
-
-        <Block style={{ flexDirection: 'row', width: width }}>
-
-
-
-          <Block style={{ opacity: this.state.button6opacity }}>
-            <TouchableOpacity
-              disabled={this.state.button6enable}
-              style={styles.button6}
-
-              onPress={() => {
-                this.setState({
-                  button6enable: true,
-                  button6opacity: 0.5,
-                  TypesSelected: this.state.TypesSelected + "shopping_mall,"
-                })
-
-              }}
-            >
-              <FontAwesome name="shopping-cart" size={32} color="white" />
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Shopping</Text>
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Malls</Text>
-            </TouchableOpacity>
-          </Block>
-
-          <Block style={{ opacity: this.state.button7opacity }}>
-            <TouchableOpacity
-              disabled={this.state.button7enable}
-              style={styles.button7}
-
-              onPress={() => {
-                this.setState({
-                  button7enable: true,
-                  button7opacity: 0.5,
-                  TypesSelected: this.state.TypesSelected + "art_gallery,"
-                })
-
-              }}
-            >
-              <FontAwesome name="shopping-bag" size={32} color="white" />
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Art</Text>
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Gallery</Text>
-            </TouchableOpacity>
-          </Block>
-
-          <Block style={{ opacity: this.state.button8opacity }}>
-            <TouchableOpacity
-              disabled={this.state.button8enable}
-              style={styles.button8}
-
-              onPress={() => {
-
-                this.setState({
-                  button8enable: true,
-                  button8opacity: 0.5,
-                  TypesSelected: this.state.TypesSelected + "museum,"
-                })
-                // alert(this.state.TypesSelected);
-
-              }}
-            >
-              <FontAwesome name="building" size={32} color="white" />
-              <Text style={{ alignItems: 'center', justifyContent: 'center', color: "white" }}>Museums</Text>
-            </TouchableOpacity>
-          </Block>
-
-        </Block>
-
-        <Block style={styles.buttonContainer}>
-          <Button
-            icon={
-              <Icon
-                name="car"
-                size={15}
-                color="white"
-              />
-            }
-            onPress={async () => {
-
-              let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
-              let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
-
-
-              if (this.state.TypesSelected === "" || departurePlaceID1 === null || destinationPlaceID1 === null) {
-              
-                alert("All are required!");
-              }
-
-              else {
-                AsyncStorage.setItem('TripStartTime', this.state.startTime.toString().replace(':',''));
-                AsyncStorage.setItem('OptiosnSelected', this.state.TypesSelected);
-                // alert(this.state.date)
-                AsyncStorage.setItem('TripStartDate', this.state.date.toString());
-                AsyncStorage.setItem('LunchTime', this.state.lunchTime.toString().replace(':',''));
-                AsyncStorage.setItem('DinnerTime', this.state.dinnerTime.toString().replace(':',''));
-                this.props.navigation.navigate("TripMapPage");
-              }
-
-            }}
-            type="solid"
-            iconLeft
-            textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
-            title="  START TRIP "
-          />
-        </Block>
-
-        {/* </Block> */}
-
-        {/* </Card> */}
-
-
+        </ScrollView>
       </Block>
     );
   }
-
 }
 
 const styles = StyleSheet.create({
@@ -573,19 +509,21 @@ const styles = StyleSheet.create({
   button1: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     borderBottomWidth: 2,
     borderLeftWidth: 2,
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
     width: width / 3,
-    height: width / 3
+    height: width / 3,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button2: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -593,39 +531,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width / 3,
-    height: width / 3
-  },
-  button3: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3b5998',
-    padding: 10,
-    borderBottomWidth: 2,
-    borderLeftWidth: 2,
-    borderRightWidth: 2,
-    borderTopWidth: 2,
-    borderColor: 'white',
-    width: width / 3,
-    height: width / 3
-  },
-  button4: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3b5998',
-    padding: 10,
-    borderBottomWidth: 2,
-    borderLeftWidth: 2,
-    borderRightWidth: 2,
-    borderTopWidth: 2,
-    borderColor: 'white',
-    // width: width - theme.SIZES.BASE * 15,
-    width: width / 3,
-    height: width / 3
+    height: width / 3,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button5: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -633,12 +546,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width / 3,
-    height: width / 3
+    height: width / 3,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button6: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -646,12 +561,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width / 3,
-    height: width / 3
+    height: width / 3,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button7: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -659,12 +576,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width / 3,
-    height: width / 3
+    height: width / 3,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button8: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -672,7 +591,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width / 3,
-    height: width / 3
+    height: width / 3,
+    borderRadius: 20,
+    opacity: 0.8
   },
   barContainer: {
     position: 'absolute',

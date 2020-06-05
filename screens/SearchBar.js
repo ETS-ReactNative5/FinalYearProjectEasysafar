@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-
-
+import { GOOGLE_API_KEY } from "react-native-dotenv";
 
 class SearchBar extends React.Component {
   constructor(props) {
@@ -22,12 +21,10 @@ class SearchBar extends React.Component {
   async onChangeDestination(destination) {
     this.setState({ destination });
 
-    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc&input=${destination}&location=${this.state.latitude},${this.state.latitude}&radius=2000`;
+    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${GOOGLE_API_KEY}&input=${destination}&location=${this.state.latitude},${this.state.latitude}&radius=2000`;
     try {
       const result = await fetch(apiUrl);
       const json = await result.json();
-      // console.log(result);
-      // console.log(json);
       this.setState({
         predictions: json.predictions
       });
@@ -38,28 +35,8 @@ class SearchBar extends React.Component {
   }
 
   async onLogin() {
-
-
     const { email, password } = this.state;
-
-    // await fetch('http://192.168.0.112:3006/userlogin?Email='+email+'&Password='+password+'')
-    // .then(res => res.json())
-    //   .then(users => {
-
-    //       if(users==1)
-    // {
-    // toast("Wow so easy !");
-    // alert("success");
-    
     this.props.navigation.navigate('Details');
-    //     }
-    //     else
-    //     {
-    //       alert("invalid credentials");
-    //     }           
-
-    // })
-
   }
 
   render() {
@@ -73,29 +50,14 @@ class SearchBar extends React.Component {
           listViewDisplayed="auto" 
           fetchDetails={true}
           renderDescription={row => row.description} 
-          // onPress={(data, details = null) => {
-          //   this.props.navigation.navigate('Onboarding');
-          //   const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=`+details.place_id+`
-          //   &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
-          //   fetch(baseUrl)
-          //     .then(res => res.json())
-
-          //     .then(res => {
-                
-          //       alert(details.place_id);
-          //       console.warn(details.place_id);
-                
-          //     });
-            
-
-          // }}
+          
           onPress={this.onLogin.bind(this)}
           getDefaultValue={() => {
             return ''; // text input default value
           }}
           query={{
            
-            key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
+            key: GOOGLE_API_KEY,
             language: 'en', 
 
           }}

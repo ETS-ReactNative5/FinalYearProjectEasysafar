@@ -1,24 +1,13 @@
 
 import React from 'react';
-import {
-    StyleSheet,
-    ImageBackground,
-    Dimensions,
-    TouchableWithoutFeedback,
-    Keyboard,
-    AsyncStorage,
-} from 'react-native';
-import { Block, Checkbox, Text, Button as GaButton, theme } from 'galio-framework';
-
-import { Button, Icon, Input } from '../components';
-import { Images, nowTheme } from '../constants';
-
-const { width, height } = Dimensions.get('screen');
-
+import { StyleSheet, ImageBackground, Dimensions, TouchableWithoutFeedback, Keyboard, AsyncStorage } from 'react-native';
+import { Block, theme } from 'galio-framework';
+import { Icon, Input } from '../components';
+import { Button } from 'react-native-elements';
+import { nowTheme } from '../constants';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-
-
+const { width, height } = Dimensions.get('screen');
 const DismissKeyboard = ({ children }) => (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>{children}</TouchableWithoutFeedback>
 );
@@ -26,7 +15,6 @@ const DismissKeyboard = ({ children }) => (
 class Register extends React.Component {
     constructor(props) {
         super(props);
-        //Initial State
         this.state = {
             email: "",
             password: "",
@@ -36,45 +24,53 @@ class Register extends React.Component {
         };
     }
 
-
     async onSignup() {
+        const { email, password, name, phone } = this.state;
+        let ip = await AsyncStorage.getItem('ip');
+
         this.setState({
             spinner: true
           });
 
-        let ip = await AsyncStorage.getItem('ip');
-
-        const { email, password, name, phone } = this.state;
-        if (email != "") {
-            if (password != "") {
-                if (name != "") {
-                    if (phone != "") {
-                        await fetch('http://' + ip + ':3006/useradd?Name=' + name + '&Email=' + email + '&Password=' + password + '&phone=' + phone + '')
+        if (name != "") {
+            if (phone != "")
+            {
+                if (phone.length>=7) {
+                if (email != "") {
+                    if(email.includes("@") && email.includes(".")) {
+                        if (password != "") {
+                        await fetch('http://' + ip + '/useradd?Name=' + name + '&Email=' + email + '&Password=' + password + '&phone=' + phone + '')
                             .then(users => {
-
                                 alert("inserted");
                                 this.props.navigation.navigate('Onboarding')
                             })
+                        }
+                        else {
+                            alert("Please enter password");
+                        }
                     }
                     else {
-                        alert("Please enter phone number.");
+                        alert("Please enter valid email address.");
                     }
                 }
                 else {
-                    alert("Please enter name.");
+                    alert("Please enter email.");
                 }
             }
             else {
-                alert("Please enter password.");
+                alert("Number should be of minimum 7 digits.");
             }
         }
         else {
-            alert("Please enter email.");
+            alert("Please enter phone number.");
+        }
+        }
+        else {
+            alert("Please enter name.");
         }
         this.setState({
             spinner: false
-          });
-
+        });
     }
 
     render() {
@@ -87,7 +83,7 @@ class Register extends React.Component {
                         textStyle={styles.spinnerTextStyle}
                     />
                     <ImageBackground
-                        source={require('../assets/hello.jpg')}
+                        source={require('../assets/background.jpg')}
                         style={styles.imageBackgroundContainer}
                         imageStyle={styles.imageBackground}
                     >
@@ -119,6 +115,7 @@ class Register extends React.Component {
                                                         <Input
                                                             placeholder="Phone #"
                                                             style={styles.inputs}
+                                                            keyboardType='number-pad'
                                                             iconContent={
                                                                 <Icon
                                                                     size={16}
@@ -169,17 +166,15 @@ class Register extends React.Component {
                                                     </Block>
 
                                                 </Block>
-                                                <Block center>
-                                                    <Button color="primary" round style={styles.createButton} onPress={this.onSignup.bind(this)}>
-                                                        <Text
-                                                            style={{ fontFamily: 'montserrat-bold' }}
-                                                            size={14}
-                                                            color={nowTheme.COLORS.WHITE}
-
-                                                        >
-                                                            CREATE
-                                                            </Text>
-                                                    </Button>
+                                                <Block center style={styles.buttonLogin}>
+                                                <Button 
+                                                    buttonStyle={{borderWidth: 2, height: 60, paddingHorizontal: theme.SIZES.BASE * 4, borderColor: 'orange', }}
+                                                    titleStyle={{color: 'white', fontSize: 25}}
+                                                    type="outline"
+                                                    iconLeft
+                                                    title="CREATE"
+                                                    onPress={this.onSignup.bind(this)}
+                                                />
                                                 </Block>
                                             </Block>
                                         </Block>
@@ -209,64 +204,36 @@ const styles = StyleSheet.create({
         marginTop: 50,
         width: width * 0.9,
         height: height < 812 ? height * 0.6 : height * 0.6,
-        backgroundColor: nowTheme.COLORS.WHITE,
         borderRadius: 4,
         shadowColor: nowTheme.COLORS.BLACK,
         shadowOffset: {
             width: 0,
             height: 4
         },
+        
         shadowRadius: 8,
         shadowOpacity: 0.1,
         elevation: 1,
         overflow: 'hidden'
     },
-    socialConnect: {
-        backgroundColor: nowTheme.COLORS.WHITE
-    },
-    socialButtons: {
-        width: 120,
-        height: 40,
-        backgroundColor: '#fff',
-        shadowColor: nowTheme.COLORS.BLACK,
-        shadowOffset: {
-            width: 0,
-            height: 4
-        },
-        shadowRadius: 8,
-        shadowOpacity: 0.1,
-        elevation: 1
-    },
-    socialTextButtons: {
-        color: nowTheme.COLORS.PRIMARY,
-        fontWeight: '800',
-        fontSize: 14
-    },
     inputIcons: {
         marginRight: 12,
         color: nowTheme.COLORS.ICON_INPUT
     },
+    buttonLogin: {
+        justifyContent: "center",
+        height: theme.SIZES.BASE * 4,
+        shadowRadius: 0,
+      },
     inputs: {
         borderWidth: 1,
         borderColor: '#E3E3E3',
         borderRadius: 21.5
     },
-    passwordCheck: {
-        paddingLeft: 2,
-        paddingTop: 6,
-        paddingBottom: 15
-    },
     createButton: {
         width: width * 0.5,
         marginTop: 25,
         marginBottom: 40
-    },
-    social: {
-        width: theme.SIZES.BASE * 3.5,
-        height: theme.SIZES.BASE * 3.5,
-        borderRadius: theme.SIZES.BASE * 1.75,
-        justifyContent: 'center',
-        marginHorizontal: 10
     }
 });
 

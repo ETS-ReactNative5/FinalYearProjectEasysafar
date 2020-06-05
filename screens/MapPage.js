@@ -3,18 +3,12 @@ import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from "react-native";
 import { GOOGLE_API_KEY } from "react-native-dotenv";
 import { AsyncStorage } from 'react-native';
-
-import {
-  FlatList,
-  ActivityIndicator,
-} from "react-native";
+import { FlatList, ActivityIndicator } from "react-native";
 import { ListItem } from "react-native-elements";
 import { Container, Content } from "native-base";
 import { Card } from 'react-native-elements';
 
-
 class MapScreen extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -28,7 +22,6 @@ class MapScreen extends Component {
     };
   }
   componentWillMount() {
-
     this.displayData()
   }
 
@@ -47,11 +40,9 @@ class MapScreen extends Component {
 
     console.log(this.props);
     const placeType = this.props.navigation.getParam('data', {});
-    // alert(placeType);
     this.setState({ placeType: placeType });
 
     this.getCurrentLocation();
-
   }
 
 

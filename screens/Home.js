@@ -3,17 +3,16 @@ import { StyleSheet, Dimensions, ScrollView, TouchableOpacity } from "react-nati
 import { Block, theme, Text } from "galio-framework";
 import MapView from './MapView';
 import { Button } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { AsyncStorage } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { GOOGLE_API_KEY } from "react-native-dotenv";
 
 const { width } = Dimensions.get("screen");
 
 class Home extends React.Component {
   constructor(props) {
     super(props);
-    //Initial State
     this.state = {
       placeType: "a",
       errors: "",
@@ -30,12 +29,10 @@ class Home extends React.Component {
   async onChangeDestination(destination) {
     this.setState({ destination });
 
-    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc&input=${destination}&location=${this.state.latitude},${this.state.latitude}&radius=2000`;
+    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${GOOGLE_API_KEY}&input=${destination}&location=${this.state.latitude},${this.state.latitude}&radius=2000`;
     try {
       const result = await fetch(apiUrl);
       const json = await result.json();
-      // console.log(result);
-      // console.log(json);
       this.setState({
         predictions: json.predictions
       });
@@ -45,46 +42,15 @@ class Home extends React.Component {
     }
   }
 
-  componentDidMount() {
-
-  }
-
-
-
   getItem = (name, text, color, type, placeType) => (
-
-
     <Block style={styles1.group}>
-
-      {/* <TouchableOpacity  >
-        <Block style={{ alignContent: 'center', }}>
-          <FontAwesome.Button style={{ width: 70, margin: 0, height: theme.SIZES.BASE * 3.5 }} name={name} color="white" backgroundColor={color} round size={size} type={type}
-            onPress={() => {
-              this.setState({ visible: true });
-              AsyncStorage.setItem('type', placeType);
-              this.props.navigation.navigate("MapPage");
-
-            }}></FontAwesome.Button>
-          <Text style={{ width: 70 }}>{text}</Text>
-
-        </Block>
-
-      </TouchableOpacity> */}
-
-
-
     </Block>
-
   );
 
   render() {
-
     return (
-
       <Block style={{flex:1}}>
-
         <Block style={{ flexDirection: 'row', paddingTop: 0 }}>
-
           <GooglePlacesAutocomplete
             placeholder="Search"
             minLength={2}
@@ -95,25 +61,20 @@ class Home extends React.Component {
             renderDescription={row => row.description}
             onPress={(data, details = null) => {
               const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=` + details.place_id + `
-            &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
+              &key=${GOOGLE_API_KEY}`;
               fetch(baseUrl)
                 .then(res => res.json())
-
                 .then(res => {
                   AsyncStorage.setItem('placeid', details.place_id);
                   this.props.navigation.navigate('Details');
                 });
-
-
             }}
             getDefaultValue={() => {
-              return ''; // text input default value
+              return ''; 
             }}
             query={{
-
-              key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
+              key: GOOGLE_API_KEY,
               language: 'en',
-
             }}
             styles={{
               description: {
@@ -125,16 +86,12 @@ class Home extends React.Component {
                 color: '#1faadb',
               },
             }}
-
-
             nearbyPlacesAPI="GooglePlacesSearch"
             GoogleReverseGeocodingQuery={
               {
-
               }
             }
             GooglePlacesSearchQuery={{
-
               rankby: 'distance',
               radius: 1000
             }}
@@ -142,170 +99,153 @@ class Home extends React.Component {
               'locality',
               'administrative_area_level_3',
             ]}
-
             debounce={200}
           />
         </Block>
 
         <MapView />
 
-        {/* <Block style={{ flexDirection: 'column', width: width }}> */}
+        <Block style={{ flexDirection: 'row', width: width }}>
+          <TouchableOpacity
+            style={styles.button1}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'park');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <Ionicons name="md-star" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Park</Text>
+          </TouchableOpacity>
 
-          <Block style={{ flexDirection: 'row', width: width }}>
-            <TouchableOpacity
-              style={styles.button1}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'park');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
+          <TouchableOpacity
+            style={styles.button2}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'tourist_attraction');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <Ionicons name="ios-bed" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Tourist </Text>
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Attraction</Text>
+          </TouchableOpacity>
 
-              }}
-            >
-              <Ionicons name="md-star" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Park</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button3}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'restaurant');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <Ionicons name="md-restaurant" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Eateries</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button2}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'tourist_attraction');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <Ionicons name="ios-bed" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Tourist </Text>
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Attraction</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button4}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'bank');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <FontAwesome name="bank" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Banks</Text>
+          </TouchableOpacity>
+        </Block>
 
-            <TouchableOpacity
-              style={styles.button3}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'restaurant');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <Ionicons name="md-restaurant" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Eateries</Text>
-            </TouchableOpacity>
+        <Block style={{ flexDirection: 'row', width: width }}>
+          <TouchableOpacity
+            style={styles.button5}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'movie_theater');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <Ionicons name="md-film" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Cinemas</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button4}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'bank');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <FontAwesome name="bank" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Banks</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button6}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'shopping_mall');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <FontAwesome name="shopping-cart" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Shopping</Text>
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Malls</Text>
+          </TouchableOpacity>
 
-          </Block>
+          <TouchableOpacity
+            style={styles.button7}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'clothing_store');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <FontAwesome name="shopping-bag" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Clothing</Text>
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Store</Text>
+          </TouchableOpacity>
 
-          <Block style={{ flexDirection: 'row', width: width }}>
-            <TouchableOpacity
-              style={styles.button5}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'movie_theater');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <Ionicons name="md-film" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Cinemas</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button6}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'shopping_mall');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <FontAwesome name="shopping-cart" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Shopping</Text>
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Malls</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button7}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'clothing_store');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <FontAwesome name="shopping-bag" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Clothing</Text>
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Store</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button8}
-              onPress={() => {
-                this.setState({ visible: true });
-                AsyncStorage.setItem('type', 'museum');
-                // alert(placeType);
-                this.props.navigation.navigate("MapPage");
-              }}
-            >
-              <FontAwesome name="building" size={32} color="white" />
-              <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Museums</Text>
-            </TouchableOpacity>
-          </Block>
-
-        {/* </Block> */}
+          <TouchableOpacity
+            style={styles.button8}
+            onPress={() => {
+              this.setState({ visible: true });
+              AsyncStorage.setItem('type', 'museum');
+              this.props.navigation.navigate("MapPage");
+            }}
+          >
+            <FontAwesome name="building" size={32} color="white" />
+            <Text style={{alignItems: 'center',justifyContent: 'center',color:"white"}}>Museums</Text>
+          </TouchableOpacity>
+        </Block>
 
         <Block style={styles.buttonContainer}>
           <Button
-            
-            type="solid"
+            buttonStyle={{borderWidth: 2, borderColor: '#191970', }}
+            type="outline"
             iconLeft
+            titleStyle={{color: '#191970'}}
             textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
             title=" CREATE TRIP "
             onPress={() =>
               this.props.navigation.navigate("createtrip")
             }
           />
-
         </Block>
-      
       </Block>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  group: {
-    paddingTop: theme.SIZES.BASE * 2
-  },
   button1: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
-    // padding: 10,
+    backgroundColor: '#191970',
     borderBottomWidth: 2,
     borderLeftWidth: 2,
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8,
+    marginTop: 11,
   },
   button2: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -313,12 +253,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8,
+    marginTop: 11
   },
   button3: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -326,26 +269,31 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8,
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8,
+    marginTop: 11
   },
   button4: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
     borderRightWidth: 2,
     borderTopWidth: 2,
     borderColor: 'white',
-    // width: width - theme.SIZES.BASE * 15,
     width: width/4 ,
-    height: theme.SIZES.BASE * 8,
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8,
+    marginTop: 11
   },
   button5: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -353,12 +301,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button6: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -366,12 +316,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button7: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -379,12 +331,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8,
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8
   },
   button8: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3b5998',
+    backgroundColor: '#191970',
     padding: 10,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
@@ -392,47 +346,22 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderColor: 'white',
     width: width/4 ,
-    height: theme.SIZES.BASE * 8,
+    height: theme.SIZES.BASE * 4.5,
+    borderRadius: 20,
+    opacity: 0.8
   },
-  input: {
-    paddingTop: 10,
-    paddingRight: 15,
-    fontSize: 15,
-    color: 'black',
-    fontWeight: '500'
-  },
-  home: {
-    flex: 1,
-  },
-
   buttonContainer: {
     paddingHorizontal: theme.SIZES.BASE * 4,
-    marginBottom: theme.SIZES.BASE,
     justifyContent: "center",
     width: width,
     height: theme.SIZES.BASE * 4,
     shadowRadius: 0,
-    shadowOpacity: 0
+    shadowOpacity: 0,
+    marginTop: 0
   },
-
-  FilterContainer: {
-    flex: 0.25,
-    justifyContent: 'flex-start',
-
-  }
 })
 
 const styles1 = StyleSheet.create({
-  iconContainer: {
-    flexDirection: 'row',
-    // justifyContent: 'space-between'
-  },
-  social: {
-    width: theme.SIZES.BASE * 3.5,
-    height: theme.SIZES.BASE * 3.5,
-    borderRadius: theme.SIZES.BASE * 1.75,
-    justifyContent: 'center'
-  },
   group: {
     flex: 1,
     flexDirection: 'column',
@@ -442,52 +371,6 @@ const styles1 = StyleSheet.create({
     paddingTop: theme.SIZES.BASE * 2,
     paddingHorizontal: theme.SIZES.BASE,
   },
-  map: {
-    ...StyleSheet.absoluteFillObject
-  },
-  home: {
-    width: width,
-    height: theme.SIZES.BASE,
-  },
-  articles: {
-    width: width - theme.SIZES.BASE * 2,
-    paddingVertical: theme.SIZES.BASE,
-    paddingHorizontal: 2,
-    fontFamily: 'montserrat-regular'
-
-  },
-  inputIcon: {
-    width: 30,
-    height: 30,
-    marginLeft: 15,
-    justifyContent: 'center'
-  },
-  buttonContainer: {
-    width: width,
-    height: theme.SIZES.BASE * 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  buttonContainer1: {
-    height: 40,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    borderRadius: 30,
-    alignContent: "center",
-  },
-  loginButton: {
-    backgroundColor: "#d5995d",
-    color: "white"
-  },
-  suggestions: {
-    height: 40,
-    backgroundColor: 'white',
-    paddingHorizontal: 10,
-
-  }
 });
 
 export default Home;

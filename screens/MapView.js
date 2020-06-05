@@ -3,14 +3,12 @@ import { StyleSheet, Dimensions } from "react-native";
 import { Block, Text, Button as GaButton, theme } from 'galio-framework';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
+import { GOOGLE_API_KEY } from "react-native-dotenv";
 import MapView from 'react-native-maps';
 import Constants from 'expo-constants';
 import { Platform } from "react-native";
-import SearchBar from './SearchBar';
-
 
 const { width, height } = Dimensions.get("screen");
-
 class Map extends React.Component {
   constructor(props) {
     super(props);
@@ -27,8 +25,6 @@ class Map extends React.Component {
   };
 
   componentWillMount() {
-
-
     if (Platform.OS === 'android' && !Constants.isDevice) {
       this._getLocationAsync();
     } else {
@@ -78,7 +74,7 @@ class Map extends React.Component {
       currentlongitudeint = parseFloat(currentlongitude);
 
 
-      fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + currentlatitudeint + ',' + currentlongitudeint + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc')
+      fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + currentlatitudeint + ',' + currentlongitudeint + '&key=' + GOOGLE_API_KEY + '')
         .then((response) => response.json())
         .then((responseJson) => {
           currentaddress = responseJson.results[0].formatted_address;
@@ -99,9 +95,6 @@ class Map extends React.Component {
           }}
           showsUserLocation={true}
         />
-
-        {/* <SearchBar /> */}
-
       </Block>
     );
   }

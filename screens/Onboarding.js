@@ -1,18 +1,13 @@
 import React from 'react';
-import { ImageBackground, Image, StyleSheet, StatusBar, Dimensions, Platform } from 'react-native';
+import { ImageBackground, StyleSheet, Dimensions } from 'react-native';
 import { Block, Text, theme } from 'galio-framework';
 import { Button } from 'react-native-elements';
-const { height, width } = Dimensions.get('screen');
 import { AsyncStorage } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { TouchableHighlight } from 'react-native';
 
-import {
-  View,
-  TextInput,
-  TouchableHighlight,
-  Alert
-} from 'react-native';
-
+var FloatingLabel = require('react-native-floating-labels');
+const { height, width } = Dimensions.get('screen');
 
 export default class Onboarding extends React.Component {
   state = {
@@ -28,30 +23,30 @@ export default class Onboarding extends React.Component {
       spinner: true
     });
 
-    AsyncStorage.setItem('ip', '192.168.0.111')
-
     if (email != "") {
-      
-      if (password != "") {
+      if(email.includes("@") && email.includes(".")) {
+        if (password != "") 
+        {
+          let ip = AsyncStorage.getItem('ip');
 
-        await fetch('http://192.168.0.111:3006/userlogin?Email=' + email + '&Password=' + password + ' ')
-          .then(res => res.json())
-          .then(users => {
-
-            if (users == 0) {
-              alert("invalid credentials");
-
-            }
-            else {
-              AsyncStorage.setItem('Email', users[0].Email.toString());
-              this.props.navigation.navigate('Home');
-            }
-          })
-
-
+          await fetch('http://192.168.43.42:3006/userlogin?Email=' + email + '&Password=' + password + ' ')
+            .then(res => res.json())
+            .then(users => {
+              if (users === 0) {
+                alert("invalid credentials");
+              }
+              else {
+                AsyncStorage.setItem('Email', users[0].Email.toString());
+                this.props.navigation.navigate('Home');
+              }
+            })
+        }
+        else {
+          alert("Please enter password.");
+        }
       }
       else {
-        alert("Please enter password.");
+        alert("Please enter valid email address.");
       }
     }
     else {
@@ -61,54 +56,61 @@ export default class Onboarding extends React.Component {
     this.setState({
       spinner: false
     });
+  }
 
-
+  componentDidMount() {
+    AsyncStorage.setItem('ip', '192.168.43.42:3006')
   }
 
   handleSubmitSignup = () => {
     this.props.navigation.navigate('Register');
   }
 
-  render() {
+  onBlur() {
+    console.log('#####: onBlur');
+  }
 
+  render() {
     return (
-      <Block style={{ flex: 1 }}>
+      <Block flex>
         <Spinner
           visible={this.state.spinner}
           textContent={'Verifying Credentials'}
           textStyle={styles.spinnerTextStyle}
         />
         <ImageBackground
-          source={require('../assets/hello.jpg')}
+          source={require('../assets/background.jpg')}
           style={styles.background}
-        //resizeMode="cover"
         >
-          <Block style={styles.logoContainer}>
-            <Image
-              source={require('../assets/icon.png')}
-              resizeMode="contain"
-            />
+          <Block style={{flex:0.3, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+            <Text color="#191970" style={{fontFamily: 'montserrat-regular'}}size={50} >Easy</Text>
+            <Text color="#191970" style={{fontFamily: 'montserrat-regular'}}size={50} >Safar</Text>
           </Block>
-
-          <Block style={styles.inputContainer}>
-            <Block style={styles.input}>
-              <Image style={styles.inputIcon} source={require('../assets/email.png')} />
-              <TextInput style={styles.inputs}
-                placeholder="Email"
-                keyboardType="email-address"
-                underlineColorAndroid='transparent'
+    
+          <Block style={{flex:0.4, flexDirection: 'column', justifyContent:'center', marginLeft: '12%',marginRight: '12%'}}>
+            <Block style={{flex:0.2, marginBottom: '15%',}}>
+              <FloatingLabel 
+                labelStyle={styles.labelInput}
+                inputStyle={styles.input}
+                style={styles.formInput}
+                keyboardType="email-address" 
                 onChangeText={(email) => this.setState({ email })}
-              />
+                onBlur={this.onBlur}
+              >
+                Email
+              </FloatingLabel>
             </Block>
 
-            <Block style={styles.input}>
-              <Image style={styles.inputIcon} source={require('../assets/password.png')} />
-              <TextInput style={styles.inputs}
-                placeholder="Password"
-                secureTextEntry={true}
-                underlineColorAndroid='transparent'
+            <Block style={{flex:0.2}}>
+              <FloatingLabel 
+                labelStyle={styles.labelInput}
+                inputStyle={styles.input}
+                style={styles.formInput}
                 onChangeText={(password) => this.setState({ password })}
-              />
+                onBlur={this.onBlur}
+              >
+                Password
+              </FloatingLabel>
             </Block>
           </Block>
 
@@ -119,16 +121,15 @@ export default class Onboarding extends React.Component {
           </Block>
 
           <Block style={styles.buttonLogin}>
-            <Button
-              type="solid"
+            <Button 
+              buttonStyle={{borderWidth: 2, borderColor: 'orange', }}
+              titleStyle={{color: 'white', fontSize: 25}}
+              type="outline"
               iconLeft
-              textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
               title="LOGIN"
               onPress={this.onLogin.bind(this)}
             />
           </Block>
-
-
         </ImageBackground>
       </Block>
     );
@@ -146,6 +147,7 @@ const styles = StyleSheet.create({
   background: {
     width: width,
     height: height,
+    flex: 1
   },
   buttonLogin: {
     paddingHorizontal: theme.SIZES.BASE * 4,
@@ -154,80 +156,15 @@ const styles = StyleSheet.create({
     width: width,
     height: theme.SIZES.BASE * 4,
     shadowRadius: 0,
-    shadowOpacity: 0
-  },
-  logoContainer: {
-    flex: 0.35,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: theme.SIZES.BASE * 2
-  },
-  inputContainer: {
-    flex: 0.25,
-    flexDirection: 'column',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingTop: theme.SIZES.BASE * 2
-
+    flex: 0.15
   },
   registerContainer: {
     flex: 0.15,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    alignContent: 'center'
+    alignContent: 'center',
   },
-  padded: {
-    paddingHorizontal: theme.SIZES.BASE * 2,
-    marginBottom: '20%',
-    position: 'absolute',
-    bottom: Platform.OS === 'android' ? theme.SIZES.BASE * 2 : theme.SIZES.BASE * 3
-  },
-
-  button: {
-    width: width - theme.SIZES.BASE * 4,
-    height: theme.SIZES.BASE * 3,
-    shadowRadius: 0,
-    shadowOpacity: 0,
-    marginLeft: '9%'
-  },
-
-  gradient: {
-    zIndex: 1,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 66
-  },
-
-  input: {
-    borderBottomColor: '#F5FCFF',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 30,
-    borderBottomWidth: 1,
-    width: 250,
-    height: 45,
-    flexDirection: 'row',
-    alignItems: 'center',
-
-  },
-
-  inputs: {
-    height: 45,
-    marginLeft: 16,
-    borderBottomColor: '#FFFFFF',
-    flex: 1,
-  },
-
-  inputIcon: {
-    width: 30,
-    height: 30,
-    marginLeft: 15,
-    justifyContent: 'center'
-  },
-
   buttonContainer: {
     height: 45,
     flexDirection: 'row',
@@ -238,12 +175,14 @@ const styles = StyleSheet.create({
     width: 250,
     borderRadius: 30,
   },
-
-  loginButton: {
-    backgroundColor: "#00b5ec",
+  labelInput: {
+    color: "#191970",
   },
-
-  loginText: {
-    color: 'white',
+  formInput: {    
+    borderBottomWidth: 2, 
+    borderColor: "#191970",       
+  },
+  input: {
+    borderWidth: 0
   }
 });

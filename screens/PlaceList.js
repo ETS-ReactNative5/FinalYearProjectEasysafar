@@ -1,22 +1,12 @@
 import React, { Component } from "react";
-import {
-  FlatList,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-  StyleSheet
-} from "react-native";
+import { FlatList, TouchableOpacity, View, ActivityIndicator, StyleSheet } from "react-native";
 import { ListItem, Text } from "react-native-elements";
 import { Container, Content } from "native-base";
 import { GOOGLE_API_KEY } from "react-native-dotenv";
-
-
 import RenderStarReview from "./ReviewStars";
 
 class PlaceList extends Component {
-  
   render() {
-    
     const { places } = this.props;
     const baseImage =
       "https://images.unsplash.com/photo-1552334405-4929565998d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80";

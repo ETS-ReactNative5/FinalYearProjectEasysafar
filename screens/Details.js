@@ -1,17 +1,14 @@
 import React, { Component } from "react";
 import { GOOGLE_API_KEY } from "react-native-dotenv";
-import { Block, Button, Text, theme } from 'galio-framework';
+import { Block, Text, theme } from 'galio-framework';
 const { width, height } = Dimensions.get("screen");
 import { Animated, View, StyleSheet, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
 import { AsyncStorage } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
-
-import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
-//Components
+import { FontAwesome } from '@expo/vector-icons';
 
 const FIXED_BAR_WIDTH = 280
 const BAR_SPACE = 10
-
 const images = [
   'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CnRtAAAATLZNl354RwP_9UKbQ_5Psy40texXePv4oAlgP4qNEkdIrkyse7rPXYGd9D_Uj1rVsQdWT4oRz4QrYAJNpFX7rzqqMlZw2h2E2y5IKMUZ7ouD_SlcHxYq1yL4KbKUv3qtWgTK0A6QbGh87GB3sscrHRIQiG2RrmU_jF4tENr9wGS_YxoUSSDrYjWmrNfeEHSGSc3FyhNLlBU&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
   'https://s-media-cache-ak0.pinimg.com/originals/40/4f/83/404f83e93175630e77bc29b3fe727cbe.jpg',
@@ -20,16 +17,13 @@ const images = [
   'https://s-media-cache-ak0.pinimg.com/originals/8d/1a/da/8d1adab145a2d606c85e339873b9bb0e.jpg',
 ]
 
-// import styles from "./styles";
 class Components extends Component {
-
   numItems = images.length
   itemWidth = (FIXED_BAR_WIDTH / this.numItems) - ((this.numItems - 1) * BAR_SPACE)
   animVal = new Animated.Value(0)
 
   constructor(props) {
     super(props);
-    //Initial State
     this.state = {
       lat: null,
       long: null,
@@ -56,21 +50,18 @@ class Components extends Component {
       review2author: "",
       review3author: "",
       review4author: "",
-
       review1text: "",
       review2text: "",
       review3text: "",
       review4text: "",
       userreview: "",
       userrating: "",
-
       review1time: "",
       review2time: "",
       review3time: "",
       review4time: "",
-
       all_reviews:[],
-
+      reviews:[],
       heartcolor: "white"
     };
   }
@@ -78,7 +69,6 @@ class Components extends Component {
   componentDidMount() {
     this.displayData()
     this.getReview()
-    
   }
 
   async checksave(){
@@ -89,9 +79,8 @@ class Components extends Component {
     let placeid = await AsyncStorage.getItem('placeid');
     let email = await AsyncStorage.getItem('Email');
 
-    await fetch('http://'+ip+':3006/checksaveplace?Email=' + email + '&PlaceID=' + placeid + ' ')
+    await fetch('http://'+ip+'/checksaveplace?Email=' + email + '&PlaceID=' + placeid + ' ')
       .then(res => res.json())
-
       .then(res => {
         if(res==1){
           this.setState({heartcolor:"red"})
@@ -104,7 +93,6 @@ class Components extends Component {
             spinner: false
           });
         }
-
       })
       .catch(res => {
         this.setState({
@@ -116,37 +104,29 @@ class Components extends Component {
   displayData = async () => {
     try {
       let placeid = await AsyncStorage.getItem('placeid');
-
       this.setState({ placeid: placeid });
       this.getPlaces(placeid);
       this.checksave()
-
-
     }
     catch (error) {
-      // alert(error)
     }
   }
 
-  getPlacesUrl(place_id, apiKey) {
-    // console.log(place_id);
-    const baseUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=name,rating,formatted_phone_number,formatted_address,geometry,name,photo,place_id,website,type,opening_hours,price_level,review&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
-
+  getPlacesUrl(place_id) {
+    console.warn(place_id);
+    const baseUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJjRWbziM5sz4R_Ih_kRGS00Y&fields=name,rating,formatted_phone_number,formatted_address,geometry,name,photo,place_id,website,type,opening_hours,price_level,review&key=AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ`;
     return `${baseUrl}`;
   }
 
   async getPlaces(place) {
-
     this.setState({
       spinner: true
     });
 
-    // alert(placeid);
-    const url = this.getPlacesUrl(place, GOOGLE_API_KEY);
-    fetch(await url)
+    fetch('https://maps.googleapis.com/maps/api/place/details/json?place_id='+place+'&fields=name,rating,formatted_phone_number,formatted_address,geometry,name,photo,place_id,website,type,opening_hours,price_level,review&key=AIzaSyBTvY-Rl6mRLBKHED8JGAJwd56EmypdG7k')
       .then(res => res.json())
-
       .then(res => {
+        console.warn(res)
         this.setState({ image1url: res.result.photos[0].photo_reference });
         this.setState({ image2url: res.result.photos[1].photo_reference });
         this.setState({ image3url: res.result.photos[2].photo_reference });
@@ -163,7 +143,6 @@ class Components extends Component {
         else {
           this.setState({ phone: res.result.formatted_phone_number });
         }
-
 
         if (res.result.price_level == 0) {
           this.setState({ price_level: 'Free' });
@@ -198,8 +177,6 @@ class Components extends Component {
           this.setState({ opening_hours: res.result.opening_hours.weekday_text });
         }
 
-
-
         if (res.result.opening_hours.open_now == undefined) {
           this.setState({ open_now: '-' });
         }
@@ -230,40 +207,45 @@ class Components extends Component {
           spinner: false
         });
       })
-      .catch(res => {
-        // alert(res)
+      .catch(error => {
+        console.warn("1: " + error)
         this.setState({
           spinner: false
         });
       });
-
-
   }
 
   async getReview() {
+    this.setState({
+      spinner: true
+    });
     let ip = await AsyncStorage.getItem('ip');
     let placeid = await AsyncStorage.getItem('placeid');
     let email = await AsyncStorage.getItem('Email');
 
-    await fetch('http://'+ip+':3006/getreview?Email=' + email + '&PlaceID=' + placeid + ' ')
-      .then(res => res.json())
-
-      .then(res => {
-        
-        this.setState({ userreview: res[0].Review });
-        this.setState({ userrating: res[0].Rating });
-
-
-      })
-      .catch(res => {
-
+    await fetch('http://'+ip+'/getreview?PlaceID=' + placeid + ' ')
+    .then(res => res.json())
+    .then(res => {
+      res.map((element, index) => {
+        // console.warn(res[0].Email)
+        const reviewobj = {}
+        reviewobj.email = res[0].Email;
+        reviewobj.rating = res[0].Rating;
+        reviewobj.review = res[0].Review;
+        this.state.reviews.push(reviewobj);
       });
-
-
+      this.setState({
+        spinner: false
+      });
+    })
+    .catch(res => {
+      this.setState({
+        spinner: false
+      });
+    });
   }
 
   async saveplace(name, image1url) {
-
     let placeid = await AsyncStorage.getItem('placeid');
     let email = await AsyncStorage.getItem('Email');
     let ip = await AsyncStorage.getItem('ip');
@@ -272,9 +254,8 @@ class Components extends Component {
       spinner: true
     });
 
-    await fetch('http://'+ip+':3006/saveplace?PlaceName=' + name + '&Email=' + email + '&PlaceID=' + placeid + '&PlacePhoto=' + image1url + ' ')
+    await fetch('http://'+ip+'/saveplace?PlaceName=' + name + '&Email=' + email + '&PlaceID=' + placeid + '&PlacePhoto=' + image1url + ' ')
       .then(users => {
-
         alert("Place Saved!");
         this.displayData();
         this.setState({
@@ -283,35 +264,27 @@ class Components extends Component {
         });
       })
       .catch(res => {
-        // alert(res)
         this.setState({
           spinner: false
         });
       });
-
-
   }
 
   render() {
-
     const { name, rating, type, address, placeid, phone, image1url, image2url, image3url, image4url, image5url, website, price_level,
       opening_hours, open_now, review1author, review1text, review1time, review2author, review2text, review2time, review3author, review3text,
-      review3time, review4author, review4text, review4time, userreview, userrating } = this.state;
+      review3time, review4author, review4text, review4time, userreview, userrating, reviews } = this.state;
 
     let imageArray = []
-
     let barArray = []
 
     images.forEach((image, i) => {
-
       const thisImage = (
         <Image
           key={`image${i}`}
           source={{ uri: image }}
           style={{ width: width }}
         />
-
-
       )
       imageArray.push(thisImage)
 
@@ -333,7 +306,6 @@ class Components extends Component {
           ]}
         >
           <Animated.View
-
             style={[
               styles.bar,
               {
@@ -350,7 +322,6 @@ class Components extends Component {
     })
 
     return (
-
       <Block style={{ flex: 1 }}>
         <Block style={styles.group}>
           <ScrollView
@@ -364,29 +335,28 @@ class Components extends Component {
               )
             }
           >
-
             <Image
-              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image1url + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image1url + '&key=' + GOOGLE_API_KEY  + '' }}
               style={{ width: width }}
             />
 
             <Image
-              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image2url + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image2url + '&key=' + GOOGLE_API_KEY  + '' }}
               style={{ width: width }}
             />
 
             <Image
-              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image3url + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image3url + '&key=' + GOOGLE_API_KEY  + '' }}
               style={{ width: width }}
             />
 
             <Image
-              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image4url + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image4url + '&key=' + GOOGLE_API_KEY  + '' }}
               style={{ width: width }}
             />
 
             <Image
-              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image5url + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+              source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + image5url + '&key=' + GOOGLE_API_KEY  + '' }}
               style={{ width: width }}
             />
           </ScrollView>
@@ -398,67 +368,48 @@ class Components extends Component {
         </Block>
 
         <Block style={{ flex: 0.65, marginTop: theme.SIZES.BASE }}>
-
           <View>
             <Spinner
               visible={this.state.spinner}
               textContent={'Gathering Details'}
               textStyle={styles.spinnerTextStyle}
             />
-
           </View>
-
 
           <ScrollView
             vertical
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={10}
-
           >
             <Block>
-
-              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#191970' }]} >
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>{name}</Text>
                   <Block style={{ flexDirection: 'column' }}>
                     <TouchableOpacity
-
                       onPress={() => {
                         AsyncStorage.setItem('PlaceName', name);
                         this.props.navigation.navigate("addreview");
                       }}>
-                      <Text style={styles.subTitle}>Add Review</Text></TouchableOpacity>
-
-                    {/* <Block style={{ marginLeft: width * 0.8 }}> */}
-
+                      <Text style={{color: 'white'}}>Add Review</Text></TouchableOpacity>
                     <TouchableOpacity
-
                       onPress={() => {
                         this.saveplace(name, image1url);
                       }}
                     >
                       <FontAwesome name="heart" size={32} color={this.state.heartcolor} />
-
                     </TouchableOpacity>
-                    {/* </Block> */}
                   </Block>
-
                 </View>
 
                 <View style={styles.cardFooter}>
-
-
                   <Text style={styles.subTitleTop}> Rating: {rating} </Text>
                   <Text style={styles.subTitle}> Type: {type[0]} </Text>
                   <Text style={styles.subTitle}> Open Now: {open_now} </Text>
                 </View>
               </TouchableOpacity>
 
-
-
-
-
-              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#191970' }]} >
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>Details</Text>
                 </View>
@@ -471,7 +422,7 @@ class Components extends Component {
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#191970' }]} >
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>Opening Hours</Text>
                 </View>
@@ -484,17 +435,15 @@ class Components extends Component {
                   <Text style={styles.subTitle}> {opening_hours[4]} </Text>
                   <Text style={styles.subTitle}> {opening_hours[5]} </Text>
                   <Text style={styles.subTitle}> {opening_hours[6]} </Text>
-
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#3b5998' }]} >
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#191970' }]} >
                 <View style={styles.cardHeader}>
                   <Text style={styles.title}>Reviews</Text>
                 </View>
 
                 <View style={styles.cardFooter}>
-
                   <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
                     <View style={styles.cardFooter}>
                       <Text style={styles.subTitleReview}> Author Name: {review1author} </Text>
@@ -519,7 +468,7 @@ class Components extends Component {
                     </View>
                   </TouchableOpacity>
 
-                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
+                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]}>
                     <View style={styles.cardFooter}>
                       <Text style={styles.subTitleReview}> Author Name: {review4author} </Text>
                       <Text style={styles.subTitleReview}> Time: {review4time} </Text>
@@ -527,16 +476,29 @@ class Components extends Component {
                     </View>
                   </TouchableOpacity>
 
+               
+                </View>
+              </TouchableOpacity>
 
-                  <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]} >
-                    <View style={styles.cardFooter}>
-                      <Text style={styles.Title}> Your Review </Text>
-                      {/* <Text style={styles.subTitleReview}> Author Name: {review4author} </Text> */}
-                      <Text style={styles.subTitleReview}> Review: {userreview} </Text>
-                      <Text style={styles.subTitleReview}> Rating: {userrating} </Text>
-                    </View>
-                  </TouchableOpacity>
+              <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#191970' }]} >
+              <View style={styles.cardHeader}>
+                  <Text style={styles.title}>Application Reviews</Text>
+                </View>
 
+                <View style={styles.cardFooter}>
+                 
+                 
+
+                  {reviews.map((marker, i) => (
+                    <TouchableOpacity disabled style={[styles.card, { backgroundColor: '#FFFFFF' }]}>
+                      <View style={styles.cardFooter}>
+                        {/* <Text style={styles.Title}> Application Reviews </Text> */}
+                        <Text style={styles.subTitleReview}> Email: {marker.email} </Text>
+                        <Text style={styles.subTitleReview}> Rating: {marker.rating} </Text>
+                        <Text style={styles.subTitleReview}> Review: {marker.review} </Text>
+                      </View>
+                    </TouchableOpacity>
+                    ))}
                 </View>
               </TouchableOpacity>
             </Block>
@@ -559,20 +521,19 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
     marginVertical: 2,
     flexBasis: '48%',
-    // marginTop: 10
+    borderRadius: 2
   },
   cardFooter: {
-    // flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: 12.5,
     paddingBottom: 25,
     paddingHorizontal: 16,
-    borderBottomLeftRadius: 1,
-    borderBottomRightRadius: 1,
-  },
-  icon: {
-    height: 20,
-    width: 20,
+    borderBottomLeftRadius: 2,
+    borderBottomRightRadius: 2,
+    backgroundColor: 'white',
+    borderWidth: 2.5,
+    borderColor: '#191970',
+    
   },
   title: {
     fontFamily: 'montserrat-regular',
@@ -592,24 +553,23 @@ const styles = StyleSheet.create({
     fontFamily: 'montserrat-regular',
     fontSize: 16,
     flex: 1,
-    color: "#FFFFFF",
+    color: "#191970",
   },
   subTitle: {
     fontFamily: 'montserrat-regular',
     fontSize: 16,
     flex: 1,
-    color: "#FFFFFF",
+    color: "#191970",
     marginTop: 10
   },
   subTitleReview: {
     fontFamily: 'montserrat-regular',
     fontSize: 16,
     flex: 1,
-    color: "black",
+    color: "#191970",
     marginTop: 10
   },
   cardHeader: {
-    // flexDirection:'row',
     paddingVertical: 5,
     paddingHorizontal: 16,
     borderTopLeftRadius: 1,
@@ -635,26 +595,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     top: 0,
-  },
-  inputIcon: {
-    width: 30,
-    height: 30,
-    marginLeft: 15,
-    justifyContent: 'center'
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 10,
-    backgroundColor: '#ecf0f1',
-  },
-  paragraph: {
-    margin: 24,
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#34495e',
   },
   spinnerTextStyle: {
     color: '#FFF'

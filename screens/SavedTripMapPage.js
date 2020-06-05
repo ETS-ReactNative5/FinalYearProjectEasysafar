@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-
 import {
     AppRegistry,
     StyleSheet,
@@ -12,21 +10,18 @@ import {
     Image,
     Dimensions,
 } from "react-native";
-
 import { AsyncStorage } from 'react-native';
-
 import { Block, theme } from 'galio-framework';
-
 import Polyline from '@mapbox/polyline';
+import Spinner from 'react-native-loading-spinner-overlay';
+import { GOOGLE_API_KEY } from "react-native-dotenv";
 
 var distance = require('euclidean-distance')
 
-import Spinner from 'react-native-loading-spinner-overlay';
+
 
 const { width, height } = Dimensions.get("window");
-
 const CARD_HEIGHT = height / 3;
-
 const CARD_WIDTH = CARD_HEIGHT - 100;
 
 class SavedTripMapPage extends Component {
@@ -82,9 +77,7 @@ class SavedTripMapPage extends Component {
         let SavedTripID = await AsyncStorage.getItem('SavedTripID');
         let ip = await AsyncStorage.getItem('ip');
 
-        // console.warn(SavedTripID + " " + ip)
-
-        await fetch('http://' + ip + ':3006/getsavedtripsbyid?id=' + SavedTripID + ' ')
+        await fetch('http://' + ip + '/getsavedtripsbyid?id=' + SavedTripID + ' ')
             .then(res => res.json())
 
             .then(res => {
@@ -125,14 +118,12 @@ class SavedTripMapPage extends Component {
         var Waypoints = this.state.Waypoints;
         var StartTime = this.state.StartTime;
 
-        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DepartureID + `&fields=rating,geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DepartureID + `&fields=rating,geometry,name,photos&key=` + GOOGLE_API_KEY + ``)
             .then(res => res.json())
 
             .then(async  starting => {
 
                 let StartingTime_Seconds = this.TimeConversion(StartTime);
-                // console.warn(StartingTime_Seconds)
-                //console.warn(StartingTime_Seconds)
 
                 let startingLatitude = starting.result.geometry.location.lat;
                 let startingLongitude = starting.result.geometry.location.lng;
@@ -149,8 +140,6 @@ class SavedTripMapPage extends Component {
                 let Starthour = Math.floor(timee / 3600);
                 timee %= 3600;
                 let Startminutes = Math.floor(timee / 60);
-
-                // console.warn(Starthour+":"+Startminutes)
 
                 startingObj.ReachTime = "-";
 
@@ -181,19 +170,18 @@ class SavedTripMapPage extends Component {
         var waypointsArray1 = waypointsArray.toString().split("|");
 
         let StartingTime_Seconds = this.TimeConversion(StartTime);
-        //console.warn(waypointsArray1.length - 2)
         var lastplace = waypointsArray1[waypointsArray1.length - 2]
 
 
         for (var i = 0; i < waypointsArray1.length; i++) {
 
             if (waypointsArray1[i].replace(",", "") != " ") {
-                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + waypointsArray1[i].replace(",", "") + `&fields=rating,geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + waypointsArray1[i].replace(",", "") + `&fields=rating,geometry,name,photos&key=` + GOOGLE_API_KEY + ``)
                     .then(res => res.json())
 
                     .then(async intermediate => {
 
-                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + DepartureID.replace(" ", "") + `&destinations=place_id:` + waypointsArray1[i].replace(",", "") + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + DepartureID.replace(" ", "") + `&destinations=place_id:` + waypointsArray1[i].replace(",", "") + `&key=` + GOOGLE_API_KEY + ``)
                             .then(res => res.json())
 
                             .then(api4 => {
@@ -266,12 +254,12 @@ class SavedTripMapPage extends Component {
 
         }
 
-        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DestinationID.replace(" ", "") + `&fields=rating,geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DestinationID.replace(" ", "") + `&fields=rating,geometry,name,photos&key=` + GOOGLE_API_KEY + ``)
             .then(res => res.json())
 
             .then(async destination => {
 
-                fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + lastplace.replace(",", "") + `&destinations=place_id:` + DestinationID.replace(" ", "") + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + lastplace.replace(",", "") + `&destinations=place_id:` + DestinationID.replace(" ", "") + `&key=` + GOOGLE_API_KEY + ``)
                     .then(res => res.json())
 
                     .then(api4 => {
@@ -342,7 +330,7 @@ class SavedTripMapPage extends Component {
         var DestinationID = this.state.DestinationID;
         var Waypoints = this.state.Waypoints;
 
-        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + DepartureID + `&destination=place_id:` + DestinationID.replace(" ", "") + `&waypoints=optimize:true|` + Waypoints.replace(" ", "") + `&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
+        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + DepartureID + `&destination=place_id:` + DestinationID.replace(" ", "") + `&waypoints=optimize:true|` + Waypoints.replace(" ", "") + `&alternatives=true&key=` + GOOGLE_API_KEY + ``);
 
         const respJson = await resp.json();
         if (respJson.routes.length > 0) {
@@ -439,7 +427,7 @@ class SavedTripMapPage extends Component {
                             <Image
 
                                 style={styles.cardImage}
-                                source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + marker.image + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+                                source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + marker.image + '&key=' + GOOGLE_API_KEY + '' }}
                                 resizeMode="cover"
                             />
                             <View style={styles.textContent}>

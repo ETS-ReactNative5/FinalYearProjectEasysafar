@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-
 import {
     AppRegistry,
     StyleSheet,
@@ -12,22 +10,16 @@ import {
     Image,
     Dimensions,
 } from "react-native";
-
 import { AsyncStorage } from 'react-native';
-
 import Polyline from '@mapbox/polyline';
-
 import haversine from 'haversine-distance'
-
+import { GOOGLE_API_KEY } from "react-native-dotenv";
 var distance = require('euclidean-distance')
 import { Block, theme } from 'galio-framework';
 import Spinner from 'react-native-loading-spinner-overlay';
-
 const { width, height } = Dimensions.get("window");
-
 const CARD_HEIGHT = height / 3;
 import { Button } from 'react-native-elements';
-
 const CARD_WIDTH = CARD_HEIGHT - 100;
 
 class createtrip extends Component {
@@ -90,7 +82,7 @@ class createtrip extends Component {
             spinner: true
         });
 
-        await fetch('http://' + ip + ':3006/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + ' &Waypoints=' + waypoints + ' &DepartureName=' + this.state.departurename + ' &DestinationName=' + this.state.destinationname + ' &TripStartDate=' + TripStartDate + ' &StartTime=' + StartTime + ' &LunchTime=' + LunchTime + '&DinnerTime=' + DinnerTime + ' ')
+        await fetch('http://' + ip + '/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + ' &Waypoints=' + waypoints + ' &DepartureName=' + this.state.departurename + ' &DestinationName=' + this.state.destinationname + ' &TripStartDate=' + TripStartDate + ' &StartTime=' + StartTime + ' &LunchTime=' + LunchTime + '&DinnerTime=' + DinnerTime + ' ')
             .then(users => {
 
                 alert("Trip Saved!");
@@ -126,7 +118,7 @@ class createtrip extends Component {
 
         let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
 
-        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+        await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,name,photos,rating&key=` + GOOGLE_API_KEY + ``)
             .then(res => res.json())
 
             .then(async  starting => {
@@ -169,7 +161,7 @@ class createtrip extends Component {
                 this.state.places_nearby.push(startingObj);
 
 
-                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name,photos,rating&key=` + GOOGLE_API_KEY + ``)
                     .then(res => res.json())
 
                     .then(async destination => {
@@ -245,7 +237,7 @@ class createtrip extends Component {
 
                                     StartTripTime_seconds = Reachingtime + (50 * 60);
 
-                                    await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1[0] + `&fields=geometry,name,photos,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                    await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + place1[0] + `&fields=geometry,name,photos,rating&key=` + GOOGLE_API_KEY + ``)
                                         .then(res => res.json())
 
                                         .then(async intermediate => {
@@ -357,7 +349,7 @@ class createtrip extends Component {
 
                         }
 
-                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + place + `&destinations=place_id:` + destinationPlaceID1 + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + place + `&destinations=place_id:` + destinationPlaceID1 + `&key=` + GOOGLE_API_KEY + ``)
                             .then(res => res.json())
 
                             .then(api4 => {
@@ -444,7 +436,7 @@ class createtrip extends Component {
 
         // await AsyncStorage.removeItem('placeratings');
         return new Promise(function (resolve, reject) {
-            fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,photos,name&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+            fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,photos,name&key=` + GOOGLE_API_KEY + ``)
                 .then(res => res.json())
 
                 .then(api1 => {
@@ -453,7 +445,7 @@ class createtrip extends Component {
                     let startingLatitude = api1.result.geometry.location.lat;
                     let startingLongitude = api1.result.geometry.location.lng;
 
-                    fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name,photos&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                    fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + destinationPlaceID1 + `&fields=geometry,name,photos&key=` + GOOGLE_API_KEY + ``)
                         .then(res => res.json())
 
                         .then(api2 => {
@@ -469,7 +461,7 @@ class createtrip extends Component {
                             let distanceStartToEnd = haversine(a, b);
 
                             //API for places nearby starting location
-                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=` + type + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=` + type + `&key=` + GOOGLE_API_KEY + ``)
                                 .then(res => res.json())
 
                                 .then(async api3 => {
@@ -489,7 +481,7 @@ class createtrip extends Component {
 
                                         let DistanceStartToSpot = haversine(e, f);
 
-                                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + element.place_id + `&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                        fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?&origins=place_id:` + departurePlaceID1 + `&destinations=place_id:` + element.place_id + `&key=` + GOOGLE_API_KEY + ``)
                                             .then(res => res.json())
 
                                             .then(api4 => {
@@ -499,7 +491,7 @@ class createtrip extends Component {
                                                 //TOTAL WHEN WE WILL REACH FROM STARTING TO SPOT
                                                 let TimeToReachSpot = StartTripTime_seconds + TravellingTime;
 
-                                                fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + element.place_id + `&fields=opening_hours,price_level,rating&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`)
+                                                fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + element.place_id + `&fields=opening_hours,price_level,rating&key=` + GOOGLE_API_KEY + ``)
                                                     .then(res => res.json())
 
                                                     .then(async api5 => {
@@ -607,7 +599,7 @@ class createtrip extends Component {
                 departurePlaceID: departurePlaceID1,
                 destinationPlaceID: destinationPlaceID1
             })
-            const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&waypoints=optimize:true|` + query + `&alternatives=true&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`);
+            const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=place_id:` + departurePlaceID1 + `&destination=place_id:` + destinationPlaceID1 + `&waypoints=optimize:true|` + query + `&alternatives=true&key=` + GOOGLE_API_KEY + ``);
 
             const respJson = await resp.json();
             if (respJson.routes.length > 0) {
@@ -708,7 +700,7 @@ class createtrip extends Component {
                                 <Image
 
                                     style={styles.cardImage}
-                                    source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + marker.image + '&key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc' }}
+                                    source={{ uri: 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + marker.image + '&key=' + GOOGLE_API_KEY + '' }}
                                     resizeMode="cover"
                                 />
                                 <View style={styles.textContent}>
