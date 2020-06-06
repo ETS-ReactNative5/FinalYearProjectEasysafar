@@ -83,7 +83,7 @@ class Register extends React.Component {
                         textStyle={styles.spinnerTextStyle}
                     />
                     <ImageBackground
-                        source={require('../assets/background.jpg')}
+                        // source={require('../assets/back.JPG')}
                         style={styles.imageBackgroundContainer}
                         imageStyle={styles.imageBackground}
                     >

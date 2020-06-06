@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Dimensions, Button, ListView } from 'react-native';
-import { Block, theme } from 'galio-framework';
+import { View, StyleSheet, Dimensions, ListView } from 'react-native';
+import { Block, theme , Text} from 'galio-framework';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { AsyncStorage } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 const { width, } = Dimensions.get("screen");
 import { GOOGLE_API_KEY } from "react-native-dotenv";
+import { Button } from 'react-native-elements';
 
 export default class makeowntrip extends Component {
     constructor(props) {
@@ -14,6 +15,7 @@ export default class makeowntrip extends Component {
         this.state = {
             inputValue: '',
             dataSource: ds.cloneWithRows([]),
+            dataSource1: ds.cloneWithRows([]),
         };
         this._handleTextChange = this._handleTextChange.bind(this);
         this._handleDeleteButtonPress = this._handleDeleteButtonPress.bind(this);
@@ -27,15 +29,21 @@ export default class makeowntrip extends Component {
     }
     
     _handleSendButtonPress = async () => {
-        let inputValue = await AsyncStorage.getItem('PlaceID')
-        if (inputValue == null) {
+        let inputValue = await AsyncStorage.getItem('Placename')
+        let inputvalue1 = await AsyncStorage.getItem('PlaceID')
+        if (inputvalue1 == null) {
             return;
         }
         const textArray = this.state.dataSource._dataBlob.s1;
         textArray.push(inputValue);
+
+        const textArray1 = this.state.dataSource1._dataBlob.s1;
+        textArray1.push(inputvalue1);
         this.setState(() => ({
             dataSource: this.state.dataSource.cloneWithRows(textArray),
+            dataSource1: this.state.dataSource1.cloneWithRows(textArray1),
             inputValue: '',
+            inputvalue1:''
         }));
     };
 
@@ -63,14 +71,9 @@ export default class makeowntrip extends Component {
                     fetchDetails={true}
                     renderDescription={row => row.description}
                     onPress={(data, details = null) => {
-                        const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=` + details.place_id + `
-                &key=AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc`;
-                        fetch(baseUrl)
-                            .then(res => res.json())
-
-                            .then(res => {
-                                AsyncStorage.setItem('PlaceID', details.place_id);
-                            });
+                       
+                        AsyncStorage.setItem('PlaceID', details.place_id);
+                        AsyncStorage.setItem('Placename', details.name);
 
 
                     }}
@@ -79,7 +82,7 @@ export default class makeowntrip extends Component {
                     }}
                     query={{
 
-                        key: 'AIzaSyBXgBUjlHGrl3g1SjxpX5LypoXBDnU56vc',
+                        // key: 'AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ',
                         language: 'en',
 
                     }}
@@ -115,9 +118,13 @@ export default class makeowntrip extends Component {
                 />
 
                 <Button
-                    title="Add"
+                    type="outline"
+                    title="ADD"
+                    titleStyle={{color: 'green'}}
+                    buttonStyle={{borderWidth: 2, borderColor: 'green', }}
                     onPress={this._handleSendButtonPress}
                 />
+
                 </Block>
 
                 <ListView
@@ -131,7 +138,10 @@ export default class makeowntrip extends Component {
                         <View style={styles.todoItem}>
                             <Text style={styles.todoText}>{rowData}</Text>
                             <Button
-                                title="Delete"
+                                type="outline"
+                                title="DELETE"
+                                titleStyle={{color: 'red'}}
+                                buttonStyle={{borderWidth: 2, borderColor: 'red', }}
                                 onPress={handleDelete}
                                 style={styles.deleteButton}
                             />
@@ -147,20 +157,23 @@ export default class makeowntrip extends Component {
                             <Icon
                                 name="car"
                                 size={15}
-                                color="white"
+                                color='#191970'
                             />
                         }
                         onPress={() => {
-                            AsyncStorage.setItem('PlacesSelected', (this.state.dataSource._dataBlob.s1).toString() );
+                            // console.warn((this.state.dataSource1._dataBlob.s1).toString())
+                            AsyncStorage.setItem('PlacesSelected', (this.state.dataSource1._dataBlob.s1).toString() );
                             AsyncStorage.setItem('TripStartTime', '1200');
                             AsyncStorage.setItem('TripEndTime', '2200');
                             this.props.navigation.navigate("OwnTripMapPage");
 
                         }}
-                        type="solid"
+                        type="outline"
+                        titleStyle={{color: '#191970'}}
+                        buttonStyle={{borderWidth: 2, borderColor: '#191970', }}
                         iconLeft
                         textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
-                        title="  START TRIP "
+                        title="  MAKE TRIP "
                     />
                 </Block>
             </View>

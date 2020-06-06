@@ -53,7 +53,9 @@ class createtrip extends Component {
             flag: 0,
             max: -100,
             departurename: "",
-            destinationname: ""
+            destinationname: "",
+
+            Day: 1,
 
 
 
@@ -82,7 +84,7 @@ class createtrip extends Component {
             spinner: true
         });
 
-        await fetch('http://' + ip + '/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + ' &Waypoints=' + waypoints + ' &DepartureName=' + this.state.departurename + ' &DestinationName=' + this.state.destinationname + ' &TripStartDate=' + TripStartDate + ' &StartTime=' + StartTime + ' &LunchTime=' + LunchTime + '&DinnerTime=' + DinnerTime + ' ')
+        await fetch('http://' + ip + '/savetrip?Email=' + email + '&DepartureID=' + departurePlaceID1 + '&DestinationID=' + destinationPlaceID1 + ' &Waypoints=' + waypoints + ' &DepartureName=' + this.state.departurename + ' &DestinationName=' + this.state.destinationname + ' &TripStartDate=' + TripStartDate + ' &StartTime=' + StartTime + ' &LunchTime=' + LunchTime + '&DinnerTime=' + DinnerTime + '&TripType=Auto ')
             .then(users => {
 
                 alert("Trip Saved!");
@@ -105,6 +107,8 @@ class createtrip extends Component {
         var TypesSelected = await AsyncStorage.getItem('OptiosnSelected');
         var TypesSelectedArray = TypesSelected.split(",");
 
+        dateflag = 0;
+
         this.setState({
             spinner: true
         });
@@ -117,6 +121,11 @@ class createtrip extends Component {
         let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
 
         let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
+
+        let TripStartDate = await AsyncStorage.getItem('TripStartDate');
+
+
+        let day = this.state.Day;
 
         await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + departurePlaceID1 + `&fields=geometry,name,photos,rating&key=` + GOOGLE_API_KEY + ``)
             .then(res => res.json())
@@ -131,6 +140,9 @@ class createtrip extends Component {
                 let timee = StartTripTime_seconds;
 
                 let Starthour = Math.floor(timee / 3600);
+
+                if (Starthour >= 24)
+                    Starthour = Starthour - 24
                 timee %= 3600;
                 let Startminutes = Math.floor(timee / 60);
 
@@ -138,7 +150,11 @@ class createtrip extends Component {
 
                 startingObj.place_id = starting.result.place_id;
 
+                startingObj.day = day;
+
                 startingObj.ReachTime = "-";
+
+                startingObj.type = "Departure";
 
                 startingObj.TimeSpent = Starthour + ":" + Startminutes
 
@@ -182,6 +198,8 @@ class createtrip extends Component {
 
                         destinationObj.rating = destination.result.rating;
 
+                        destinationObj.type = "Destination";
+
                         destinationObj.marker = {
                             latitude: endingLatitude,
                             longitude: endingLongitude
@@ -209,25 +227,26 @@ class createtrip extends Component {
                         }
                         var count = 0;
 
-                        var flag1=0;
+                        var flag1 = 0;
 
                         let Type = TypesSelectedArray[0]
 
                         while (SpotToDestination > 1000) {
                             // while (i < 2) {
-                            
+
 
                             for (var k = 0; k < TypesSelectedArray.length - 1; k++) {
 
                                 i = i + 1;
 
-                                // console.warn(flag1)
 
                                 var place1 = await this.PickSpot(place, radius, Type);
 
                                 place1 = place1.split(",");
 
                                 if (place1[0].length > 0) {
+
+                                    // console.warn("Place found!  " + place1[0])
 
                                     count = 0;
 
@@ -241,6 +260,8 @@ class createtrip extends Component {
                                         .then(res => res.json())
 
                                         .then(async intermediate => {
+                                            // console.warn("Place found!  " + intermediate.result.name + " " + Type)
+
                                             let intermediateLatitude = intermediate.result.geometry.location.lat;
                                             let intermediateLongitude = intermediate.result.geometry.location.lng;
 
@@ -251,10 +272,23 @@ class createtrip extends Component {
                                             SpotToDestination = haversine(c, d);
 
                                             let Reachinghour = Math.floor(Reachingtime / 3600);
+                                            if (Reachinghour >= 24)
+                                                Reachinghour = Reachinghour - 24;
                                             Reachingtime %= 3600;
                                             let Reachingminutes = Math.floor(Reachingtime / 60);
 
                                             let Endhour = Math.floor(Endtime / 3600);
+                                            if (Endhour >= 24) {
+                                                Endhour = Endhour - 24;
+                                                if (dateflag == 0) {
+                                                    dateflag = 1;
+                                                    day = day + 1;
+                                                }
+                                                else {
+
+                                                }
+                                            }
+
                                             Endtime %= 3600;
                                             let Endminutes = Math.floor(Endtime / 60);
 
@@ -268,6 +302,8 @@ class createtrip extends Component {
 
                                             intermediateObj.place_id = intermediate.result.place_id;
 
+                                            intermediateObj.day = day;
+
                                             if (intermediate.result.photos != undefined)
                                                 intermediateObj.image = intermediate.result.photos[0].photo_reference;
                                             else
@@ -276,6 +312,8 @@ class createtrip extends Component {
                                             intermediateObj.name = intermediate.result.name;
 
                                             intermediateObj.rating = intermediate.result.rating;
+
+                                            intermediateObj.type = Type;
 
                                             intermediateObj.ReachTime = Reachinghour + ":" + Reachingminutes;
 
@@ -295,19 +333,17 @@ class createtrip extends Component {
                                             let string = "place_id:" + place1[0] + "|";
                                             finalstring = finalstring + string;
 
-                                            if (temp - 3000 < LunchTIme_Seconds && LunchTIme_Seconds < temp + 3000 || temp - 3000 < DinnerTime_Seconds && DinnerTime_Seconds < temp + 3000 ) {
-                                                if(flag1==0)
-                                                {
+                                            if (temp - 3000 < LunchTIme_Seconds && LunchTIme_Seconds < temp + 3000 || temp - 3000 < DinnerTime_Seconds && DinnerTime_Seconds < temp + 3000) {
+                                                if (flag1 == 0) {
                                                     // console.warn(DinnerTime_Seconds+ " " + temp + " " + "a")
                                                     Type = 'restaurant';
-                                                    flag1=1;
-                                                }                                                   
+                                                    flag1 = 1;
+                                                }
                                                 else
                                                     Type = TypesSelectedArray[k]
                                             }
-                                            else
-                                            {
-                                                flag1=0;
+                                            else {
+                                                flag1 = 0;
                                                 Type = TypesSelectedArray[k]
                                             }
                                             place = place1[0];
@@ -323,14 +359,20 @@ class createtrip extends Component {
 
                                 }
                                 else {
-
                                     Type = TypesSelectedArray[k]
+
+                                    // console.warn("No place found!  " + Type + " " + radius + " " + count)
 
                                     count++;
 
-                                    if (count > 3) {
+                                    if (count >= 3) {
 
                                         SpotToDestination = SpotToDestination - 1000;
+                                    }
+
+                                    if (count >= 7) {
+                                        alert("No ");
+                                        SpotToDestination = 100;
                                     }
 
                                     StartTripTime_seconds = parseInt(StartTripTime_seconds);
@@ -361,14 +403,25 @@ class createtrip extends Component {
                                 let TimeToReachSpot = StartTripTime_seconds + TravellingTime;
 
                                 let hour = Math.floor(TimeToReachSpot / 3600);
+                                if (hour >= 24) {
+                                    hour = hour - 24;
+                                    if (dateflag == 0) {
+                                        dateflag = 1;
+                                        day = day + 1;
+                                    }
+                                    else {
+
+                                    }
+                                }
+
                                 TimeToReachSpot %= 3600;
                                 let minutes = Math.floor(TimeToReachSpot / 60);
-
-                                // console.warn(hour+":"+minutes)
 
                                 destinationObj.ReachTime = hour + ":" + minutes
 
                                 destinationObj.TimeSpent = "-"
+
+                                destinationObj.day = day;
 
                                 this.state.places_nearby.push(destinationObj);
                             })
@@ -460,8 +513,32 @@ class createtrip extends Component {
 
                             let distanceStartToEnd = haversine(a, b);
 
+                            var keyword = "";
+
+                            if (type == "shopping_mall") {
+                                keyword = "shopping mall";
+                            }
+                            else if (type == "amusement_park") {
+                                keyword = "park";
+                            }
+                            else if (type == "restaurant") {
+                                keyword = "restaurant";
+                            }
+                            else if (type == "tourist_attraction") {
+                                keyword = "tourist attraction";
+                            }
+                            else if (type == "movie_theater") {
+                                keyword = "cinema";
+                            }
+                            else if (type == "art_gallery") {
+                                keyword = "art gallery";
+                            }
+                            else if (type == "museum") {
+                                keyword = "museum";
+                            }
+
                             //API for places nearby starting location
-                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&radius=` + radius + `&type=` + type + `&key=` + GOOGLE_API_KEY + ``)
+                            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=` + startingLatitude + `,` + startingLongitude + `&business_status=OPERATIONAL&radius=` + radius + `&keyword=` + keyword + `&key=` + GOOGLE_API_KEY + ``)
                                 .then(res => res.json())
 
                                 .then(async api3 => {
@@ -496,7 +573,7 @@ class createtrip extends Component {
 
                                                     .then(async api5 => {
 
-                                                        if (DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot > 500) {
+                                                        if (DistanceSpotToDestination < distanceStartToEnd && DistanceStartToSpot > 750) {
                                                             // console.warn(api3.results.length + " " + j + " " + index)
                                                             let rating = api5.result.rating;
 
@@ -649,11 +726,13 @@ class createtrip extends Component {
         return (
             <View style={{ flex: 1 }}>
                 <View style={styles.container}>
+
                     <Spinner
                         visible={this.state.spinner}
                         textContent={'Preparing your trip'}
                         textStyle={styles.spinnerTextStyle}
                     />
+
 
                     <MapView style={styles.map} initialRegion={{
                         latitude: startingLat,
@@ -661,6 +740,8 @@ class createtrip extends Component {
                         latitudeDelta: 0.0922,
                         longitudeDelta: 0.0421
                     }}>
+
+
 
                         {places_nearby.map((marker, i) => (
 
@@ -693,10 +774,11 @@ class createtrip extends Component {
                         contentContainerStyle={styles.endPadding}
                     >
 
-
                         {places_nearby.map((marker, i) => (
 
                             <View style={styles.card} key={i}>
+                                <Text numberOfLines={1} style={styles.cardDescription}>Day: {marker.day}</Text>
+
                                 <Image
 
                                     style={styles.cardImage}
@@ -708,13 +790,11 @@ class createtrip extends Component {
                                     <Text numberOfLines={1} style={styles.cardtitle}>{marker.name}</Text>
                                     <Text numberOfLines={1} style={styles.cardDescription}></Text>
                                     <Text numberOfLines={1} style={styles.cardDescription}>Rating: {marker.rating}</Text>
+                                    <Text numberOfLines={1} style={styles.cardDescription}>Type: {marker.type}</Text>
                                     <Text numberOfLines={1} style={styles.cardDescription}>ReachTime : {marker.ReachTime}</Text>
                                     <Text numberOfLines={1} style={styles.cardDescription}>TimeSpent: {marker.TimeSpent}</Text>
                                 </View>
                             </View>
-
-
-
 
                         ))}
 
@@ -728,17 +808,17 @@ class createtrip extends Component {
                 <View style={{ flex: 0.1 }}>
                     <Block style={styles.buttonContainer}>
                         <Button
-
                             onPress={async () => {
-
                                 this.saveTrip();
-
                             }}
-                            type="solid"
+                            type="outline"
                             iconLeft
+                            titleStyle={{ color: '#191970' }}
+                            buttonStyle={{ borderWidth: 2, borderColor: '#191970', }}
                             textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
                             title=" SAVE TRIP "
                         />
+
                     </Block>
 
                 </View>
@@ -795,7 +875,7 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         shadowOpacity: 0.3,
         shadowOffset: { x: 2, y: -2 },
-        height: CARD_HEIGHT,
+        height: CARD_HEIGHT * 1.25,
         width: CARD_WIDTH,
         overflow: "hidden",
     },

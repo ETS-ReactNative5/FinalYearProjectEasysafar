@@ -1,123 +1,173 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Dimensions, Button, ListView } from 'react-native';
+import { View, StyleSheet, Dimensions, ListView } from 'react-native';
 import { Block, theme } from 'galio-framework';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { AsyncStorage } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-const { width, } = Dimensions.get("screen");
+const { width, height } = Dimensions.get("screen");
 import { GOOGLE_API_KEY } from "react-native-dotenv";
+import { Button } from 'react-native-elements';
+
 
 export default class makeowntrip extends Component {
-   
+
+    componentDidMount(){
+        AsyncStorage.removeItem('destinationPlaceID');
+        AsyncStorage.removeItem('departurePlaceID');
+    }
 
     render() {
         return (
+
             <View style={styles.container}>
 
-<Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1 }}>
-<GooglePlacesAutocomplete
-      placeholder='Search'
-      onPress={(data, details = null) => {
-        // 'details' is provided when fetchDetails = true
-        console.log(data, details);
-      }}
-      query={{
-        key: 'AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ',
-        language: 'en',
-      }}
-    />
-</Block>
+                <Block style={{ flex: 0.8, paddingTop: height * 0.3, }}>
+
+                    <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1, width: width * 0.8 }}>
+
+                        <GooglePlacesAutocomplete
+                            placeholder="Departure"
+                            minLength={2}
+                            autoFocus={false}
+                            returnKeyType={'search'}
+                            listViewDisplayed="auto"
+                            fetchDetails={true}
+                            renderDescription={row => row.description}
+                            onPress={(data, details = null) => {
+
+                                AsyncStorage.setItem('departurePlaceID', details.place_id);
 
 
-                <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 1 }}>
 
-                    <GooglePlacesAutocomplete
-                        placeholder="Destination Location"
-                        minLength={2}
-                        autoFocus={false}
-                        returnKeyType={'search'}
-                        listViewDisplayed="auto"
-                        fetchDetails={true}
-                        renderDescription={row => row.description}
-                        onPress={(data, details = null) => {
-                            const baseUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=` + details.place_id + `
-&key=AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ`;
-                            fetch(baseUrl)
-                                .then(res => res.json())
+                            }}
+                            getDefaultValue={() => {
+                                return ''; // text input default value
+                            }}
+                            query={{
 
-                                .then(res => {
-                                    // alert(details.place_id);
-                                    AsyncStorage.setItem('destinationPlaceID', details.place_id);
-                                    // this.props.navigation.navigate('Details');
-                                });
+                                // key: 'AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ',
+                                language: 'en',
 
-
-                        }}
-                        getDefaultValue={() => {
-                            return ''; // text input default value
-                        }}
-                        query={{
-
-                            key: 'AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ',
-                            language: 'en',
-
-                        }}
-                        styles={{
-                            description: {
-                                fontWeight: 'bold',
-                                backgroundColor: "white",
-                                fontSize: 15,
-                            },
-                            predefinedPlacesDescription: {
-                                color: '#1faadb',
-                            },
-                        }}
+                            }}
+                            styles={{
+                                description: {
+                                    fontWeight: 'bold',
+                                    backgroundColor: "white",
+                                    fontSize: 15,
+                                },
+                                predefinedPlacesDescription: {
+                                    color: '#1faadb',
+                                },
+                            }}
 
 
-                        nearbyPlacesAPI="GooglePlacesSearch"
-                        GoogleReverseGeocodingQuery={
-                            {
+                            nearbyPlacesAPI="GooglePlacesSearch"
+                            GoogleReverseGeocodingQuery={
+                                {
 
+                                }
                             }
-                        }
-                        GooglePlacesSearchQuery={{
+                            GooglePlacesSearchQuery={{
 
-                            rankby: 'distance',
-                            radius: 1000
-                        }}
-                        filterReverseGeocodingByTypes={[
-                            'locality',
-                            'administrative_area_level_3',
-                        ]}
+                                rankby: 'distance',
+                                radius: 1000
+                            }}
+                            filterReverseGeocodingByTypes={[
+                                'locality',
+                                'administrative_area_level_3',
+                            ]}
 
-                        debounce={200}
-                    />
+                            debounce={200}
+                        />
+                    </Block>
+
+                    <Block style={{ flexDirection: 'row', paddingTop: theme.SIZES.BASE * 2, width: width * 0.8 }}>
+
+                        <GooglePlacesAutocomplete
+                            placeholder="Destination"
+                            minLength={2}
+                            autoFocus={false}
+                            returnKeyType={'search'}
+                            listViewDisplayed="auto"
+                            fetchDetails={true}
+                            renderDescription={row => row.description}
+                            onPress={(data, details = null) => {
+
+                                AsyncStorage.setItem('destinationPlaceID', details.place_id);
+
+
+
+                            }}
+                            getDefaultValue={() => {
+                                return ''; // text input default value
+                            }}
+                            query={{
+
+                                // key: 'AIzaSyBAWJq9ZYiVO7EXu7YjryOb0vFJQCEwFKQ',
+                                language: 'en',
+
+                            }}
+                            styles={{
+                                description: {
+                                    fontWeight: 'bold',
+                                    backgroundColor: "white",
+                                    fontSize: 15,
+                                },
+                                predefinedPlacesDescription: {
+                                    color: '#1faadb',
+                                },
+                            }}
+
+
+                            nearbyPlacesAPI="GooglePlacesSearch"
+                            GoogleReverseGeocodingQuery={
+                                {
+
+                                }
+                            }
+                            GooglePlacesSearchQuery={{
+
+                                rankby: 'distance',
+                                radius: 1000
+                            }}
+                            filterReverseGeocodingByTypes={[
+                                'locality',
+                                'administrative_area_level_3',
+                            ]}
+
+                            debounce={200}
+                        />
+                    </Block>
+
                 </Block>
 
-                
+                <Block style={{ flex: 0.2 }}>
 
-                <Block style={styles.buttonContainer}>
-                    <Button
-                        icon={
-                            <Icon
-                                name="car"
-                                size={15}
-                                color="white"
-                            />
-                        }
-                        onPress={() => {
-                            AsyncStorage.setItem('PlacesSelected', (this.state.dataSource._dataBlob.s1).toString() );
-                            AsyncStorage.setItem('TripStartTime', '1200');
-                            AsyncStorage.setItem('TripEndTime', '2200');
-                            this.props.navigation.navigate("makeowntripplaces");
+                    <Block style={styles.buttonContainer}>
+                        <Button
+                            onPress={async () => {
+                                let destinationPlaceID1 = await AsyncStorage.getItem('destinationPlaceID');
+                                let departurePlaceID1 = await AsyncStorage.getItem('departurePlaceID');
+                                if (departurePlaceID1 === null || destinationPlaceID1 === null) {
+                                    alert("All are required!");
+                                }
+                                else {
+                                    this.props.navigation.navigate("makeowntripplaces");
+                                }
 
-                        }}
-                        type="solid"
-                        iconLeft
-                        textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
-                        title="  START TRIP "
-                    />
+
+                            }}
+                            type="outline"
+                            titleStyle={{ color: '#191970' }}
+                            buttonStyle={{ borderWidth: 2, borderColor: '#191970', }}
+                            iconLeft
+                            textStyle={{ fontFamily: 'montserrat-regular', fontSize: 12 }}
+                            title=" PROCEED "
+                        />
+
+                    </Block>
                 </Block>
+
             </View>
         );
     }

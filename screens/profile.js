@@ -66,6 +66,7 @@ class Profile extends React.Component {
           marketObj.DinnerTime = element.DinnerTime;
           marketObj.DestinationName = element.DestinationName;
           marketObj.DepartureName = element.DepartureName;
+          marketObj.TripType = element.TripType;
 
           markers.push(marketObj);
         });
@@ -340,7 +341,7 @@ class Profile extends React.Component {
               <Block style={styles.cardTrips}>
                 <Block style={styles.textContent}>
 
-                  <Text numberOfLines={1} style={styles.cardtitle}>Trip # {index + 1}</Text>
+                  <Text numberOfLines={1} style={styles.cardtitle}>Trip # {index + 1}        {element.TripType} Generated</Text>
                   <Text numberOfLines={1} style={styles.cardDescription}></Text>
                   <Text numberOfLines={1} style={styles.cardDescription}>Departure : {element.DepartureName}</Text>
                   <Text numberOfLines={1} style={styles.cardDescription}>Destination : {element.DestinationName}</Text>

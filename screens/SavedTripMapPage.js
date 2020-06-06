@@ -62,7 +62,9 @@ class SavedTripMapPage extends Component {
             StartTime: "",
             StartDate: "",
             LunchTime: "",
-            DinnerTime: ""
+            DinnerTime: "",
+
+            Day: 1,
 
 
         };
@@ -118,6 +120,8 @@ class SavedTripMapPage extends Component {
         var Waypoints = this.state.Waypoints;
         var StartTime = this.state.StartTime;
 
+        let day = this.state.Day;
+
         await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=` + DepartureID + `&fields=rating,geometry,name,photos&key=` + GOOGLE_API_KEY + ``)
             .then(res => res.json())
 
@@ -138,10 +142,14 @@ class SavedTripMapPage extends Component {
                 let timee = StartingTime_Seconds;
 
                 let Starthour = Math.floor(timee / 3600);
+                if (Starthour >= 24)
+                    Starthour = Starthour - 24;
                 timee %= 3600;
                 let Startminutes = Math.floor(timee / 60);
 
                 startingObj.ReachTime = "-";
+
+                startingObj.day = day;
 
                 startingObj.EndTime = Starthour + ":" + Startminutes
 
@@ -194,6 +202,8 @@ class SavedTripMapPage extends Component {
                                 let time = TimeToReachSpot
 
                                 let Reachinghour = Math.floor(time / 3600);
+                                if (Reachinghour >= 24)
+                                    Reachinghour = Reachinghour - 24;
                                 time %= 3600;
                                 let Reachingminutes = Math.floor(time / 60);
 
@@ -203,6 +213,16 @@ class SavedTripMapPage extends Component {
 
 
                                 let Endhour = Math.floor(Endtime / 3600);
+                                if (Endhour >= 24) {
+                                    Endhour = Endhour - 24;
+                                    if (dateflag == 0) {
+                                        dateflag = 1;
+                                        day = day + 1;
+                                    }
+                                    else {
+
+                                    }
+                                }
                                 Endtime %= 3600;
                                 let Endminutes = Math.floor(Endtime / 60);
 
@@ -213,6 +233,8 @@ class SavedTripMapPage extends Component {
                                 const intermediateObj = {};
 
                                 intermediateObj.place_id = intermediate.result.place_id;
+
+                                intermediateObj.day = day;
 
                                 if (intermediate.result.photos != undefined)
                                     intermediateObj.image = intermediate.result.photos[0].photo_reference;
@@ -271,6 +293,16 @@ class SavedTripMapPage extends Component {
                         let TimeToReachSpot = StartingTime_Seconds + TravellingTime + 600;
 
                         let hour = Math.floor(TimeToReachSpot / 3600);
+                        if (hour >= 24) {
+                            hour = hour - 24;
+                            if (dateflag == 0) {
+                                dateflag = 1;
+                                day = day + 1;
+                            }
+                            else {
+
+                            }
+                        }
                         TimeToReachSpot %= 3600;
                         let minutes = Math.floor(TimeToReachSpot / 60);
 
@@ -291,6 +323,8 @@ class SavedTripMapPage extends Component {
                         destinationObj.ReachTime = hour + ":" + minutes;
 
                         destinationObj.EndTime = "-";
+
+                        destinationObj.day = day;
 
                         destinationObj.marker = {
                             latitude: endingLatitude,
@@ -424,6 +458,8 @@ class SavedTripMapPage extends Component {
                     {places_nearby.map((marker, i) => (
 
                         <View style={styles.card} key={i}>
+                            <Text numberOfLines={1} style={styles.cardDescription}>Day: {marker.day}</Text>
+
                             <Image
 
                                 style={styles.cardImage}
@@ -498,7 +534,7 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         shadowOpacity: 0.3,
         shadowOffset: { x: 2, y: -2 },
-        height: CARD_HEIGHT,
+        height: CARD_HEIGHT * 1.25,
         width: CARD_WIDTH,
         overflow: "hidden",
     },
